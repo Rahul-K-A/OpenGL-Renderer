@@ -80,9 +80,8 @@ int main()
     CreateWindow();
     CreateObjects();
     CreateShaders();
-
-    std::cout << Window.getBufferHeight() << std::endl;
-    std::cout << Window.getBufferWidth() << std::endl;
+    std::cout <<"Buffer Height:"<< Window.getBufferHeight() << std::endl;
+    std::cout << "Buffer Width:" << Window.getBufferWidth() << std::endl;
     //Get aspect ratio (16:9, 4:3, etc.) of buffer
     float AspectRatio = (Window.getBufferWidth() / Window.getBufferHeight()) * 1.f;
 
@@ -104,7 +103,7 @@ int main()
         glm::mat4 model(1.f);
 
         //Handles keyboard and mouse events
-        glfwPollEvents();
+        Window.PollWindowEvents();
 
         //Sets color buffer values 
         glClearColor(0.f, 0.f, 0.f, 1.f);
