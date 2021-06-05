@@ -2,7 +2,7 @@
 
 
 //Constructor
-Shader::Shader() :ShaderId{ 0 }, UniformModel{ 0 }, UniformProjection{ 0 }
+Shader::Shader() :ShaderId{ 0 }, UniformModel{ 0 }, UniformProjection{ 0 },UniformView{0}
 {
 
 }
@@ -35,7 +35,6 @@ std::string Shader::ReadFile(const char* FilePath)
     //Incase path is wrong or file doesnt exist return empty stirng
     if (!FileStream.is_open())
     {
-        std::cout << "File doesnt exist\n";
         return "";
     }
     //String to read the file 
@@ -112,6 +111,7 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
 
     UniformModel = glGetUniformLocation(ShaderId, "model");
     UniformProjection = glGetUniformLocation(ShaderId, "projection");
+    UniformView= glGetUniformLocation(ShaderId, "view");
 
 }
 
@@ -125,6 +125,11 @@ GLuint Shader::GetUniformModel()
 GLuint Shader::GetUniformProjection()
 {
     return UniformProjection;
+}
+
+GLuint Shader::GetUniformView()
+{
+    return UniformView;
 }
 
 //Enables shaders

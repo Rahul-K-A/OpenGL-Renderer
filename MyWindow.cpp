@@ -161,12 +161,16 @@ void MyWindow::CalcYChange(float Value)
 
 double MyWindow::GetXChange()
 {
-    return xChange;
+    GLfloat temp = xChange;
+    xChange = 0.f;
+    return temp;
 }
 
 double MyWindow::GetYChange()
 {
-    return yChange;
+    GLfloat temp = yChange;
+    yChange = 0.f;
+    return temp;
 }
 
 void MyWindow::CalcXChange(float Value)
@@ -202,12 +206,10 @@ void MyWindow::HandleKeys(GLFWwindow* WindowToHandle, int Key, int Code, int Act
         if (Action == GLFW_PRESS)
         {
             TheWindow->SetKey(Key);
-            std::cout << "Pressed: " << Key << std::endl;
         }
         else if (Action == GLFW_RELEASE)
         {
             TheWindow->ClearKey(Key);
-            std::cout << "Released: " << Key << std::endl;
         }
     }
 }

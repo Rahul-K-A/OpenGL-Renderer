@@ -21,6 +21,8 @@ public:
 	GLuint GetUniformModel();
 	//Returns uniform variable projection location ID
 	GLuint GetUniformProjection();
+	//Returns uniform variable view location ID
+	GLuint GetUniformView();
 	//Enables the shader
 	void EnableShader();
 	//Disables the shader
@@ -35,6 +37,7 @@ private:
 	GLuint  UniformModel;
 	//Uniform variable projection location ID
 	GLuint UniformProjection;
+	GLuint UniformView;
 	//Adds the shader to the program
 	GLuint AddShader(GLuint TheProgram, const char* ShaderCode, GLenum ShaderType);
 	//Compiles the shader
