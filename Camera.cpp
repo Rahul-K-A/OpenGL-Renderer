@@ -1,8 +1,8 @@
 #include "Camera.h"
 
-Camera::Camera(glm::vec3 InitialPosition, glm::vec3 InitialWorldUpVector, GLfloat InitialYaw, GLfloat InitialPitch, GLfloat InitialMovementSpeed,GLfloat InitialTurnSpeed)
+Camera::Camera(glm::vec3 InitialPosition, GLfloat InitialYaw, GLfloat InitialPitch, GLfloat InitialMovementSpeed,GLfloat InitialTurnSpeed)
     //Initialzer list
-	:Position{ InitialPosition }, WorldUp{ InitialWorldUpVector }, Front{ glm::vec3(0.f,0.f,-1.f) }, Yaw{ InitialYaw }, Pitch{ InitialPitch }, MovementSpeed{ InitialMovementSpeed },TurnSpeed{InitialTurnSpeed}
+	:Position{ InitialPosition }, Front{ glm::vec3(0.f,0.f,-1.f) }, Yaw{ InitialYaw }, Pitch{ InitialPitch }, MovementSpeed{ InitialMovementSpeed },TurnSpeed{InitialTurnSpeed}
 {
 	Update();
 }

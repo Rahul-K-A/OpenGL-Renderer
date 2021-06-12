@@ -5,12 +5,13 @@
   out vec4 vColour;
 
   uniform mat4 model;
-
   uniform mat4 projection; 
+  uniform mat4 view;
+
 
   void main()
   {
-    gl_Position= projection*model*vec4(position,1.f);
+    gl_Position= projection*view*model*vec4(position,1.f);
 
     vColour=vec4(clamp(position,0.f,1.f),1.f);
   }

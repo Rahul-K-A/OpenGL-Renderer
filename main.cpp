@@ -12,7 +12,7 @@
 MyWindow Window(800, 600);
 
 //Camera
-Camera Cam(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f),-90.f,0.f,4.f,40.f);
+Camera Cam(glm::vec3(0.f, 0.f, 0.f),0.f,0.f,4.f,40.f);
 
 //Vectors containing Mesh pointer and shader pointer
 std::vector<Mesh*> MeshPointers;
@@ -25,8 +25,9 @@ GLuint UniformCameraView;
 
 //Conversion variable which converts deg to rad
 float ToRadians = 22.f / (7.f * 180.f);
-
+//Delta time is the time difference between the rendering of two successive frames. It helps make certain actions framerate independant
 float DeltaTime = 0.f;
+//Last time stores time value to calculate deltatime
 float LastTime = 0.f;
 
 //Vertex shader

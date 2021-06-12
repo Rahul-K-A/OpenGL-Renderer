@@ -58,8 +58,9 @@ int MyWindow::Initialise()
     glfwSetInputMode(MainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     //Create the viewport and map to window
     CreateViewport();
-    //Basically sets this instance of the MyWindow class as the user 
-    //of the mainWindow declared previously in the function.
+    //User pointer is a pointer which is stored by the window in the state machine which is set by the user.
+    //It can be used to store anything
+    //We use it to store a pointer to itself
     glfwSetWindowUserPointer(MainWindow, this);
     return 1;
 }
@@ -179,7 +180,7 @@ void MyWindow::CalcXChange(float Value)
 }
 
 
-bool MyWindow::MouseHasNotMoved()
+bool MyWindow::getMouseNotMoved()
 {
     return MouseNotMoved;
 }
@@ -191,22 +192,31 @@ void MyWindow::MouseHasMoved()
 
 //Handles key events
 void MyWindow::HandleKeys(GLFWwindow* WindowToHandle, int Key, int Code, int Action, int Mode)
-{
-    //Gets a pointer to the user of the window
-    //Basically we are calling a pointer to the MyWindow object which created the WindowToHandle and setting it to TheWindow
+{   
+    //DONT BE CONFUSED WITH THE PARAMS
+    //ONE IS GLFWwindow class AND THE OTHER IS MyWindow class
+
+    //Gets a pointer to the MyWindow instance which created the WindowToHandle
+    //Since the function is declared as static , "this" keyword and other members of class cant be directly used.
+    //Thus pointer to the window is stored in user pointer in glfw and set again within the function
+    //static_cast prevents accidental type casting 
     MyWindow* TheWindow = static_cast<MyWindow*>(glfwGetWindowUserPointer(WindowToHandle));
-    //Handling closing the window
+    //std::cout << "Window to handle: " << WindowToHandle << std::endl;
+    //std::cout << "Window from user pointer: " << TheWindow <<"\n\n\n\n";
+    //Handling closing the window when escape key is pressed
     if (Key == GLFW_KEY_ESCAPE && Action == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(WindowToHandle, true);
     }
-
+    //If the key pressed has an ascii value
     if (Key >= 0 && Key < 1024)
     {
+        //Sets the corresponding position in the key array to true
         if (Action == GLFW_PRESS)
         {
             TheWindow->SetKey(Key);
         }
+        //Sets the corresponding position in the key array to false
         else if (Action == GLFW_RELEASE)
         {
             TheWindow->ClearKey(Key);
@@ -219,9 +229,11 @@ void MyWindow::HandleKeys(GLFWwindow* WindowToHandle, int Key, int Code, int Act
 void MyWindow::HandleMouse(GLFWwindow* WindowToHandle, double CurrentMouseXPosition, double CurrentMouseYPosition)
 {
     //Gets a pointer to the user of the window
-    //Basically we are calling a pointer to the MyWindow object which created the WindowToHandle and setting it to TheWindow
+    //Since the function is declared as static , "this" keyword and other members of class cant be directly used.
+    //Thus pointer to the window is stored in user pointer in glfw and set again within the function
+    //static_cast prevents accidental type casting 
     MyWindow* TheWindow = static_cast<MyWindow*>(glfwGetWindowUserPointer(WindowToHandle));
-    if (TheWindow->MouseHasNotMoved())
+    if (TheWindow->getMouseNotMoved())
     {
         TheWindow->SetLastX(CurrentMouseXPosition);
         TheWindow->SetLastY(CurrentMouseYPosition);
