@@ -12,7 +12,7 @@
 MyWindow Window(800, 600);
 
 //Camera
-Camera Cam(glm::vec3(0.f, 0.f, 0.f),0.f,0.f,4.f,40.f);
+Camera Cam(glm::vec3(0.0f, 0.0f, 0.0f),-90.0f,0.0f,4.0f,40.0f);
 
 //Vectors containing Mesh pointer and shader pointer
 std::vector<Mesh*> MeshPointers;
@@ -24,11 +24,11 @@ GLuint UniformProjection;
 GLuint UniformCameraView;
 
 //Conversion variable which converts deg to rad
-float ToRadians = 22.f / (7.f * 180.f);
+float ToRadians = 22.f / (7.0f * 180.0f);
 //Delta time is the time difference between the rendering of two successive frames. It helps make certain actions framerate independant
-float DeltaTime = 0.f;
+float DeltaTime = 0.0f;
 //Last time stores time value to calculate deltatime
-float LastTime = 0.f;
+float LastTime = 0.0f;
 
 //Vertex shader
 static const char* vShader = "Shaders/shader.vert";
@@ -50,11 +50,11 @@ void CreateObjects()
 
     GLfloat Vertices[] = {
         //Index of the vertex
-        -1.f,-1.f,0.f, //0
+        -1.0f,-1.0f,0.0f, //0
         //adding 4th vertex in the 3rd dimension (z axis)
-         0.f,-0.33f,1.f,  //1
-         1.f,-1.f,0.f,  //2
-         0.f,1.f,0.f,   //3
+         0.0f,-0.33f,1.0f,  //1
+         1.0f,-1.0f,0.0f,  //2
+         0.0f,1.0f,0.0f,   //3
     };
 
     Mesh* Obj1 = new Mesh();
@@ -97,10 +97,10 @@ int main()
     CreateObjects();
     CreateShaders();
     //Get aspect ratio (16:9, 4:3, etc.) of buffer
-    float AspectRatio = (Window.getBufferWidth() / Window.getBufferHeight()) * 1.f;
+    float AspectRatio = (Window.getBufferWidth() / Window.getBufferHeight()) * 1.0f;
 
     //Angle for fov is actually defined along y axis and should be given in radians
-    glm::mat4 projection = glm::perspective(60.f * ToRadians, AspectRatio, 1.f, 100.f);
+    glm::mat4 projection = glm::perspective(60.0f * ToRadians, AspectRatio, 1.0f, 100.f);
 
     float Offset = 0.00f;
     float Increment = 0.0001f;
@@ -113,7 +113,7 @@ int main()
         DeltaTime = now - LastTime;
         LastTime = now;
         //Creating identity matrix to store the transforms
-        glm::mat4 model(1.f);
+        glm::mat4 model(1.0f);
 
         //Handles keyboard and mouse events
         Window.PollWindowEvents(); 
@@ -121,7 +121,7 @@ int main()
         Cam.MouseControl(Window.GetXChange(), Window.GetYChange(),DeltaTime);
 
         //Sets color buffer values 
-        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         //Resets the color buffer and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -131,15 +131,15 @@ int main()
         ShaderPointers[0]->EnableShader();
 
         //Render Mesh 1
-        model = glm::translate(model, glm::vec3(0.f, 0.f, -5.f));
-        model = glm::scale(model, glm::vec3(2.f, 2.f, 3.f));
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
+        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 3.0f));
         glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(UniformCameraView, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
         MeshPointers[0]->RenderMesh();
 
         //Reset transform matrix
-        model = glm::mat4(1.f);
+        model = glm::mat4(1.0f);
 
       
      

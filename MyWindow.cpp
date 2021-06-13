@@ -163,14 +163,18 @@ void MyWindow::CalcYChange(float Value)
 double MyWindow::GetXChange()
 {
     GLfloat temp = xChange;
-    xChange = 0.f;
+    //We reset xChange to 0 so that the rotation stops when the mouse movement stops 
+    //Else camera rotates even without mouse input
+    xChange = 0.0f;
     return temp;
 }
 
 double MyWindow::GetYChange()
 {
+    //We reset yChange to 0 so that the rotation stops when the mouse movement stops 
+    //Else camera rotates even without mouse input
     GLfloat temp = yChange;
-    yChange = 0.f;
+    yChange = 0.0f;
     return temp;
 }
 
@@ -184,6 +188,8 @@ bool MyWindow::getMouseNotMoved()
 {
     return MouseNotMoved;
 }
+
+
 
 void MyWindow::MouseHasMoved()
 {
