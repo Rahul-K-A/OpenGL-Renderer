@@ -39,6 +39,18 @@ void Camera::KeyControl(bool* KeyArray,float DeltaTime)
 	{
 		Position = Position -(Right *Velocity);
 	}
+
+	/*if (KeyArray[GLFW_KEY_Q])
+	{
+		Position = Position + (WorldUp * Velocity);
+	}
+
+
+	if (KeyArray[GLFW_KEY_E])
+	{
+		Position = Position - (WorldUp * Velocity);
+	}*/
+
 	//std::cout << Position.x << " "<<Position.y <<" " << Position.z << std::endl;
 }
 
@@ -49,11 +61,10 @@ void Camera::MouseControl(float MouseX, float MouseY, float DeltaTime)
 	//Magic numbers are bad but couldnt help it with this one. 
 	//Delta time *2 with a turn speed of 40.0 , DeltaTime*2 gives the optimal rate of turn
 
-	MouseX *= (TurnSpeed * DeltaTime*2);
-	MouseY *= (TurnSpeed * DeltaTime*2);
+	MouseX *= (TurnSpeed * DeltaTime);
+	MouseY *= (TurnSpeed * DeltaTime);
 
 	Yaw += MouseX;
-	
 
 	Pitch += MouseY;
 
@@ -65,7 +76,6 @@ void Camera::MouseControl(float MouseX, float MouseY, float DeltaTime)
 	{
 		Pitch = -89.9f;
 	}
-
 
 
 	Update();
@@ -83,8 +93,6 @@ void Camera::Update()
 	Front.y = sin(glm::radians(Pitch));
 	Front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
 	Front = glm::normalize(Front);
-
 	Right = glm::normalize(glm::cross(Front, WorldUp));
 	Up = glm::normalize(glm::cross(Right,Front));
-
 }

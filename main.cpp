@@ -1,3 +1,4 @@
+#define STB_IMAGE_IMPLEMENTATION
 #include <iostream>
 #include "Mesh.h"
 #include "Shader.h"
@@ -7,6 +8,7 @@
 #include <glm\gtc\type_ptr.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <vector>
+#include "Texture.h"
 
 //Window object
 MyWindow Window(800, 600);
@@ -22,6 +24,9 @@ std::vector<Shader*> ShaderPointers;
 GLuint  UniformModel;
 GLuint UniformProjection;
 GLuint UniformCameraView;
+
+//Textures
+Texture BrickTexture,DirtTexture;
 
 //Conversion variable which converts deg to rad
 float ToRadians = 22.f / (7.0f * 180.0f);
@@ -50,25 +55,19 @@ void CreateObjects()
 
     GLfloat Vertices[] = {
         //Index of the vertex
-        -1.0f,-1.0f,0.0f, //0
-        //adding 4th vertex in the 3rd dimension (z axis)
-         0.0f,-0.33f,1.0f,  //1
-         1.0f,-1.0f,0.0f,  //2
-         0.0f,1.0f,0.0f,   //3
+         //x  ,y    ,z      u       v         Index
+        -1.0f,-1.0f,0.0f,   0.0f ,  0.0f,      //0
+         0.0f,-0.33f,1.0f,  0.5f  , 0.0f,      //1
+         1.0f,-1.0f,0.0f,   1.0f  , 0.0f,      //2
+         0.0f,1.0f,0.0f,    0.5f  , 1.0f,       //3
     };
 
     Mesh* Obj1 = new Mesh();
-    Obj1->CreateMesh(Vertices, Indices, 12, 12);
+    Obj1->CreateMesh(Vertices, Indices, 20, 12);
     MeshPointers.push_back(Obj1);
     Mesh* Obj2 = new Mesh();
-    Obj2->CreateMesh(Vertices, Indices, 12, 12);
+    Obj2->CreateMesh(Vertices, Indices, 20, 12);
     MeshPointers.push_back(Obj2);
-    Mesh* Obj3 = new Mesh();
-    Obj3->CreateMesh(Vertices, Indices, 12, 12);
-    MeshPointers.push_back(Obj3);
-    Mesh* Obj4 = new Mesh();
-    Obj4->CreateMesh(Vertices, Indices, 12, 12);
-    MeshPointers.push_back(Obj4);
 }
 
 
@@ -102,18 +101,28 @@ int main()
     //Angle for fov is actually defined along y axis and should be given in radians
     glm::mat4 projection = glm::perspective(60.0f * ToRadians, AspectRatio, 1.0f, 100.f);
 
+    //Set texture paths
+    BrickTexture.setPath((char*)("Textures/brick.png"));
+    BrickTexture.LoadTexture();
+    DirtTexture.setPath((char*)("Textures/dirt.png"));
+    DirtTexture.LoadTexture();
+
     float Offset = 0.00f;
     float Increment = 0.0001f;
 
+    glm::mat4 model;
+    int fps = 0;
+    float seconds = 0.0f;
 
     while (Window.IsOpen())
     {
 
         GLfloat now = glfwGetTime();
         DeltaTime = now - LastTime;
+        //std::cout << "Deltatime: " << DeltaTime << std::endl;
         LastTime = now;
         //Creating identity matrix to store the transforms
-        glm::mat4 model(1.0f);
+        model = glm::mat4(1.0f);
 
         //Handles keyboard and mouse events
         Window.PollWindowEvents(); 
@@ -136,16 +145,21 @@ int main()
         glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(UniformCameraView, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
+        BrickTexture.UseTexture();
         MeshPointers[0]->RenderMesh();
+
 
         //Reset transform matrix
         model = glm::mat4(1.0f);
 
+        model = glm::translate(model, glm::vec3(0.0f, 5.0f, -5.0f));
+        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 3.0f));
+        glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(UniformCameraView, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
+        DirtTexture.UseTexture();
+        MeshPointers[0]->RenderMesh();
       
-     
-
-        //Reset transform matrix
-       // model = glm::mat4(1.f);
 
         //Disable shader
         ShaderPointers[0]->DisableShader();

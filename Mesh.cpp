@@ -27,10 +27,27 @@ void Mesh::CreateMesh(GLfloat* Vertices, unsigned int* Indices, unsigned int Num
     //Links Vbo to OpenGL State machine
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices[0]) * NumberOfVertices, Vertices, GL_STATIC_DRAW);
 
-    //For attrib Pointer, 0 in the first value of Vbo
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    //Set mesh data
+
+    //For attrib Pointer, 0 in the first value of Vbo,
+    //5th param is the start position od the first vertex
+    //2cd param is number of data points to be read consecutively
+    //5th param is the offset to the address of the first data point.By default 0
+    //4th param is the offset between sets of data points 
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,sizeof(Vertices[0])*5,0);
     //glEnableVertexAttribArray enables the generic vertex attribute array specified by index. 0 is the default index but you can have many
     glEnableVertexAttribArray(0);
+
+
+    //Set texture data
+    //Texture only needs UV data to wrap the image around the mesh so 2cd param is 2
+    //first UV value
+    //We set the texture info in index 1 of the attribute array
+    //Since we need the 4th and 5th points in a index of vertices the 5th param offset is Vectrices[0]*3
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertices[0]) * 5, (void*)(sizeof(Vertices[0]) * 3));
+    glEnableVertexAttribArray(1);
+
     //Unlinks Vbo from OpenGL state machine
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     //Unlinks Vao from state machine
