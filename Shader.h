@@ -23,7 +23,9 @@ public:
 	GLuint GetUniformProjection();
 	//Returns uniform variable view location ID
 	GLuint GetUniformView();
+	//Returns uniform variable ambient light colour ID
 	GLuint GetUniformAmbientLightColour();
+	//Returns uniform variable ambient light intensity ID
 	GLuint GetUniformAmbientLightIntensity();
 	//Enables the shader
 	void EnableShader();
