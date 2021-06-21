@@ -1,10 +1,12 @@
 #include "Texture.h"
 
 Texture::Texture()  //Inititaizer list
-	:Width{ 0 }, Height{ 0 }, TextureID{0},NumberOfChannels{0},FileLocation{(char*)("")}{}
+	:Width{ 0 }, Height{ 0 }, TextureID{0},NumberOfChannels{0},FileLocation{(char*)("")}
+	/*Empty function*/ {}
 
 Texture::Texture(char* Path)  //Inititaizer list
-	: Width{ 0 }, Height{ 0 }, TextureID{ 0 },NumberOfChannels{ 0 }, FileLocation{Path}{}
+	: Width{ 0 }, Height{ 0 }, TextureID{ 0 },NumberOfChannels{ 0 }, FileLocation{Path}
+	/*Empty function*/ {}
 
 void Texture::LoadTexture()
 {

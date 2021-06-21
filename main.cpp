@@ -9,12 +9,18 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <vector>
 #include "Texture.h"
+#include "Light.h"
 
 //Window object
 MyWindow Window(800, 600);
 
 //Camera
 Camera Cam(glm::vec3(0.0f, 0.0f, 0.0f),-90.0f,0.0f,4.0f,40.0f);
+
+
+//Light
+Light DLight(1.0f, 0.0f, 1.0f,0.0f);
+float Intensity;
 
 //Vectors containing Mesh pointer and shader pointer
 std::vector<Mesh*> MeshPointers;
@@ -24,6 +30,9 @@ std::vector<Shader*> ShaderPointers;
 GLuint  UniformModel;
 GLuint UniformProjection;
 GLuint UniformCameraView;
+GLuint UniformCol;
+GLuint UniformAlpha;
+
 
 //Textures
 Texture BrickTexture,DirtTexture;
@@ -80,6 +89,9 @@ void CreateShaders()
     UniformProjection = ShaderPointers[0]->GetUniformProjection();
     UniformModel = ShaderPointers[0]->GetUniformModel();
     UniformCameraView = ShaderPointers[0]->GetUniformView();
+    UniformCol = ShaderPointers[0]->GetUniformAmbientLightColour();
+    UniformAlpha = ShaderPointers[0]->GetUniformAmbientLightIntensity();
+
 }
 
 //Function which creates window()
@@ -135,9 +147,10 @@ int main()
         //Resets the color buffer and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+        
         //Enable shader
         ShaderPointers[0]->EnableShader();
+        DLight.UseLight(UniformCol, UniformAlpha);
 
         //Render Mesh 1
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
@@ -145,6 +158,8 @@ int main()
         glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(UniformCameraView, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
+        
+        
         BrickTexture.UseTexture();
         MeshPointers[0]->RenderMesh();
 
@@ -159,6 +174,12 @@ int main()
         glUniformMatrix4fv(UniformCameraView, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
         DirtTexture.UseTexture();
         MeshPointers[0]->RenderMesh();
+
+        Intensity = DLight.GetIntensity();
+        Intensity += Increment;
+        if (Intensity > 1.0f || Intensity < 0.0f)
+            Increment *= -1;
+        DLight.SetIntensity(Intensity);
       
 
         //Disable shader

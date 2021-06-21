@@ -2,7 +2,7 @@
 
 
 //Constructor
-Shader::Shader() :ShaderId{ 0 }, UniformModel{ 0 }, UniformProjection{ 0 },UniformView{0}
+Shader::Shader() :ShaderId{ 0 }, UniformModel{ 0 }, UniformProjection{ 0 },UniformView{0},UniformAmbientLightColour{0},UniformAmbientLightIntensity{0}
 {
 
 }
@@ -112,6 +112,8 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
     UniformModel = glGetUniformLocation(ShaderId, "model");
     UniformProjection = glGetUniformLocation(ShaderId, "projection");
     UniformView= glGetUniformLocation(ShaderId, "view");
+    UniformAmbientLightColour = glGetUniformLocation(ShaderId, "dLight.LightColour");
+    UniformAmbientLightIntensity= glGetUniformLocation(ShaderId, "dLight.AlphaIntensity");
 
 }
 
@@ -130,6 +132,16 @@ GLuint Shader::GetUniformProjection()
 GLuint Shader::GetUniformView()
 {
     return UniformView;
+}
+
+GLuint Shader::GetUniformAmbientLightColour()
+{
+    return UniformAmbientLightColour;
+}
+
+GLuint Shader::GetUniformAmbientLightIntensity()
+{
+    return UniformAmbientLightIntensity;
 }
 
 //Enables shaders
