@@ -56,13 +56,14 @@ void Camera::KeyControl(bool* KeyArray,float DeltaTime)
 
 
 //Handles mouse input 
-void Camera::MouseControl(float MouseX, float MouseY, float DeltaTime)
+void Camera::MouseControl(double MouseX, double MouseY, float DeltaTime)
 {
 	//Magic numbers are bad but couldnt help it with this one. 
 	//Delta time *2 with a turn speed of 40.0 , DeltaTime*2 gives the optimal rate of turn
 
-	MouseX *= (TurnSpeed * DeltaTime);
-	MouseY *= (TurnSpeed * DeltaTime);
+	double MovementSpeed = (double)TurnSpeed * (double)DeltaTime;
+	MouseX *= MovementSpeed;
+	MouseY *= MovementSpeed;
 
 	Yaw += MouseX;
 

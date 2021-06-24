@@ -247,6 +247,7 @@ void MyWindow::HandleMouse(GLFWwindow* WindowToHandle, double CurrentMouseXPosit
     }
     TheWindow->CalcXChange(CurrentMouseXPosition);
     TheWindow->CalcYChange(CurrentMouseYPosition);
+
     TheWindow->SetLastX(CurrentMouseXPosition);
     TheWindow->SetLastY(CurrentMouseYPosition);
 }

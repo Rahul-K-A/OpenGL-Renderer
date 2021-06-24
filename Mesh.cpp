@@ -2,10 +2,7 @@
 
 //Constructor
 Mesh::Mesh()
-    :Vao{ 0 }, Vbo{ 0 }, Ibo{ 0 }, IndexCount{ 0 }
-{
-
-}
+    :Vao{ 0 }, Vbo{ 0 }, Ibo{ 0 }, IndexCount{ 0 }{}
 
 //Creates Mesh from indices and vertices
 void Mesh::CreateMesh(GLfloat* Vertices, unsigned int* Indices, unsigned int NumberOfVertices, unsigned int NumberOfIndices)
@@ -35,7 +32,7 @@ void Mesh::CreateMesh(GLfloat* Vertices, unsigned int* Indices, unsigned int Num
     //2cd param is number of data points to be read consecutively
     //5th param is the offset to the address of the first data point.By default 0
     //4th param is the offset between sets of data points 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,sizeof(Vertices[0])*5,0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,sizeof(Vertices[0])*8,0);
     //glEnableVertexAttribArray enables the generic vertex attribute array specified by index. 0 is the default index but you can have many
     glEnableVertexAttribArray(0);
 
@@ -45,8 +42,11 @@ void Mesh::CreateMesh(GLfloat* Vertices, unsigned int* Indices, unsigned int Num
     //first UV value
     //We set the texture info in index 1 of the attribute array
     //Since we need the 4th and 5th points in a index of vertices the 5th param offset is Vectrices[0]*3
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertices[0]) * 5, (void*)(sizeof(Vertices[0]) * 3));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertices[0]) * 8, (void*)(sizeof(Vertices[0]) * 3));
     glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertices[0]) * 8, (void*)(sizeof(Vertices[0]) * 5));
+    glEnableVertexAttribArray(2);
 
     //Unlinks Vbo from OpenGL state machine
     glBindBuffer(GL_ARRAY_BUFFER, 0);

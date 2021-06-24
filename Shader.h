@@ -27,6 +27,10 @@ public:
 	GLuint GetUniformAmbientLightColour();
 	//Returns uniform variable ambient light intensity ID
 	GLuint GetUniformAmbientLightIntensity();
+	//Returns uniform variable diffuse light direction ID
+	GLuint GetUniformDiffuseDirection();
+	//Returns uniform variable diffuse light intensity ID
+	GLuint GetUniformDiffuseIntensity();
 	//Enables the shader
 	void EnableShader();
 	//Disables the shader
@@ -44,6 +48,8 @@ private:
 	GLuint UniformView;
 	GLuint UniformAmbientLightColour;
 	GLuint UniformAmbientLightIntensity;
+	GLuint UniformDiffuseDirection;
+	GLuint UniformDiffuseIntensity;
 	//Adds the shader to the program
 	GLuint AddShader(GLuint TheProgram, const char* ShaderCode, GLenum ShaderType);
 	//Compiles the shader

@@ -19,7 +19,7 @@ Camera Cam(glm::vec3(0.0f, 0.0f, 0.0f),-90.0f,0.0f,4.0f,40.0f);
 
 
 //Light
-Light DLight(1.0f, 0.0f, 1.0f,0.0f);
+Light DLight(glm::vec4(1.0f, 1.0f, 1.0f,0.2f), glm::vec4(2.0f,-1.0f,-2.0f,1.0f));
 float Intensity;
 
 //Vectors containing Mesh pointer and shader pointer
@@ -32,6 +32,8 @@ GLuint UniformProjection;
 GLuint UniformCameraView;
 GLuint UniformCol;
 GLuint UniformAlpha;
+GLuint UniformDiffuseDir;
+GLuint UniformDiffuseIntensity;
 
 
 //Textures
@@ -51,32 +53,80 @@ static const char* vShader = "Shaders/shader.vert";
 static const char* fShader = "Shaders/shader.frag";
 
 
+void CalculateAverageNormals(unsigned int* Indices, unsigned int IndiceCount, GLfloat* Vertices, unsigned int VerticeCount, unsigned int vLength, unsigned int normalOffset)
+{
+    for (size_t i = 0; i < IndiceCount; i += 3)
+    {
+        unsigned int in0 = Indices[i+0] * vLength;
+        unsigned int in1 = Indices[i+1] * vLength;
+        unsigned int in2 = Indices[i+2] * vLength;
+
+        glm::vec3 v1(Vertices[in1] - Vertices[in0]  ,    Vertices[in1 + 1] - Vertices[in0 + 1]   , Vertices[in1 + 2] - Vertices[in0 + 2]);
+        glm::vec3 v2(Vertices[in2] - Vertices[in0]  ,    Vertices[in2 + 1] - Vertices[in0 + 1]   , Vertices[in2 + 2] - Vertices[in0 + 2]);
+        glm::vec3 Normalvec = glm::cross(v1, v2);
+
+        Normalvec = glm::normalize(Normalvec);
+
+        in0 += normalOffset;
+        in1 += normalOffset;
+        in2 += normalOffset;
+
+        Vertices[in0] += Normalvec.x;
+        Vertices[in0+1] += Normalvec.y;
+        Vertices[in0+2] += Normalvec.z;
+
+        Vertices[in1] += Normalvec.x;
+        Vertices[in1+1] += Normalvec.y;
+        Vertices[in1+2] += Normalvec.z;
+
+        Vertices[in2] += Normalvec.x;
+        Vertices[in2+1] += Normalvec.y;
+        Vertices[in2+2] += Normalvec.z;
+    }
+ 
+
+    for (size_t i = 0; i < VerticeCount / vLength; i++)
+    {
+        unsigned int nOffset = i * vLength + normalOffset;
+        glm::vec3 vec(Vertices[nOffset], Vertices[nOffset + 1], Vertices[nOffset + 2]);
+        vec = glm::normalize(vec);
+        Vertices[nOffset] = vec.x;
+        Vertices[nOffset + 1] = vec.y;
+        Vertices[nOffset + 2] = vec.z;
+    }
+}
+
+
 //Function which creates mesh
 void CreateObjects()
 {
     unsigned int Indices[] = {
         //The order in which the indexed vertices are to be rendered in sets of three
-        1,2,3,
-        0,1,3,
-        0,2,3,
-        0,2,1
+        0, 3, 1,
+        1, 3, 2,
+        2, 3, 0,
+        0, 1, 2
     };
 
     GLfloat Vertices[] = {
         //Index of the vertex
-         //x  ,y    ,z      u       v         Index
-        -1.0f,-1.0f,0.0f,   0.0f ,  0.0f,      //0
-         0.0f,-0.33f,1.0f,  0.5f  , 0.0f,      //1
-         1.0f,-1.0f,0.0f,   1.0f  , 0.0f,      //2
-         0.0f,1.0f,0.0f,    0.5f  , 1.0f,       //3
+         //x  ,   y    ,  z      u       v         nx      ny      nz               Index
+        -1.0f ,-1.0f ,0.0f ,   0.0f ,  0.0f ,     0.0f , 0.0f ,  0.0f ,             //0
+         0.0f ,-0.33f ,1.0f ,  0.5f  , 0.0f ,     0.0f , 0.0f ,  0.0f ,             //1
+         1.0f ,-1.0f ,0.0f ,   1.0f  , 0.0f ,     0.0f , 0.0f ,  0.0f ,             //2
+         0.0f ,1.0f ,0.0f ,    0.5f  , 1.0f ,     0.0f , 0.0f ,  0.0f               //3
     };
+     
+
+    CalculateAverageNormals(Indices, 12, Vertices, 32, 8, 5);
 
     Mesh* Obj1 = new Mesh();
-    Obj1->CreateMesh(Vertices, Indices, 20, 12);
+    Obj1->CreateMesh(Vertices, Indices, 32, 12);
     MeshPointers.push_back(Obj1);
     Mesh* Obj2 = new Mesh();
-    Obj2->CreateMesh(Vertices, Indices, 20, 12);
+    Obj2->CreateMesh(Vertices, Indices, 32, 12);
     MeshPointers.push_back(Obj2);
+    
 }
 
 
@@ -91,6 +141,10 @@ void CreateShaders()
     UniformCameraView = ShaderPointers[0]->GetUniformView();
     UniformCol = ShaderPointers[0]->GetUniformAmbientLightColour();
     UniformAlpha = ShaderPointers[0]->GetUniformAmbientLightIntensity();
+    UniformDiffuseDir = ShaderPointers[0]->GetUniformDiffuseDirection();
+    UniformDiffuseIntensity = ShaderPointers[0]->GetUniformDiffuseIntensity();
+    std::cout << "\nmain Uniform DD loc: " << UniformDiffuseDir << std::endl;
+    std::cout << "main Uniform DD loc: " << UniformDiffuseIntensity << std::endl;
 
 }
 
@@ -120,7 +174,7 @@ int main()
     DirtTexture.LoadTexture();
 
     float Offset = 0.00f;
-    float Increment = 0.0001f;
+    float Increment = 0.1f;
 
     glm::mat4 model;
     int fps = 0;
@@ -150,41 +204,38 @@ int main()
         
         //Enable shader
         ShaderPointers[0]->EnableShader();
-        DLight.UseLight(UniformCol, UniformAlpha);
+        DLight.UseLight(UniformCol, UniformAlpha,UniformDiffuseDir,UniformDiffuseIntensity);
 
         //Render Mesh 1
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
         model = glm::scale(model, glm::vec3(2.0f, 2.0f, 3.0f));
+        model = glm::rotate(model, Offset * ToRadians, glm::vec3(0.f, 1.f, 0.f));
         glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(UniformCameraView, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
         
-        
+        Offset += Increment;
         BrickTexture.UseTexture();
         MeshPointers[0]->RenderMesh();
-
+       
 
         //Reset transform matrix
         model = glm::mat4(1.0f);
 
+        DLight.UseLight(UniformCol, UniformAlpha, UniformDiffuseDir, UniformDiffuseIntensity);
         model = glm::translate(model, glm::vec3(0.0f, 5.0f, -5.0f));
         model = glm::scale(model, glm::vec3(2.0f, 2.0f, 3.0f));
         glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(UniformCameraView, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
-        DirtTexture.UseTexture();
-        MeshPointers[0]->RenderMesh();
 
-        Intensity = DLight.GetIntensity();
-        Intensity += Increment;
-        if (Intensity > 1.0f || Intensity < 0.0f)
-            Increment *= -1;
-        DLight.SetIntensity(Intensity);
-      
+        DirtTexture.UseTexture();
+        MeshPointers[1]->RenderMesh();
 
         //Disable shader
         ShaderPointers[0]->DisableShader();
         //SwapBuffers
         Window.SwapBuffers();
+
     }
 }

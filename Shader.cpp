@@ -2,7 +2,7 @@
 
 
 //Constructor
-Shader::Shader() :ShaderId{ 0 }, UniformModel{ 0 }, UniformProjection{ 0 },UniformView{0},UniformAmbientLightColour{0},UniformAmbientLightIntensity{0}
+Shader::Shader() :ShaderId{ 0 }, UniformModel{ 0 }, UniformProjection{ 0 },UniformView{0},UniformAmbientLightColour{0},UniformAmbientLightIntensity{0},UniformDiffuseDirection{0},UniformDiffuseIntensity{0}
 {
 
 }
@@ -114,6 +114,11 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
     UniformView= glGetUniformLocation(ShaderId, "view");
     UniformAmbientLightColour = glGetUniformLocation(ShaderId, "dLight.LightColour");
     UniformAmbientLightIntensity= glGetUniformLocation(ShaderId, "dLight.AlphaIntensity");
+    UniformDiffuseDirection = glGetUniformLocation(ShaderId, "dLight.Direction");
+    UniformDiffuseIntensity = glGetUniformLocation(ShaderId, "dLight.DiffuseIntensity");
+    std::cout << "Uniform DD loc: " << UniformDiffuseDirection<<std::endl;
+    std::cout << "Uniform DD loc: " << UniformDiffuseIntensity << std::endl;
+
 
 }
 
@@ -142,6 +147,16 @@ GLuint Shader::GetUniformAmbientLightColour()
 GLuint Shader::GetUniformAmbientLightIntensity()
 {
     return UniformAmbientLightIntensity;
+}
+
+GLuint Shader::GetUniformDiffuseDirection()
+{
+    return UniformDiffuseDirection;
+}
+
+GLuint Shader::GetUniformDiffuseIntensity()
+{
+    return UniformDiffuseIntensity;
 }
 
 //Enables shaders
