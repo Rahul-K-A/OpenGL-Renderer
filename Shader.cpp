@@ -3,9 +3,7 @@
 
 //Constructor
 Shader::Shader() :ShaderId{ 0 }, UniformModel{ 0 }, UniformProjection{ 0 },UniformView{0},UniformAmbientLightColour{0},UniformAmbientLightIntensity{0},UniformDiffuseDirection{0},UniformDiffuseIntensity{0}
-{
-
-}
+{}
 
 //Create shaders from text directly
 void Shader::CreateShadersFromText(const char* vShaderCode, const char* fShaderCode)
@@ -116,8 +114,8 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
     UniformAmbientLightIntensity= glGetUniformLocation(ShaderId, "dLight.AlphaIntensity");
     UniformDiffuseDirection = glGetUniformLocation(ShaderId, "dLight.Direction");
     UniformDiffuseIntensity = glGetUniformLocation(ShaderId, "dLight.DiffuseIntensity");
-    std::cout << "Uniform DD loc: " << UniformDiffuseDirection<<std::endl;
-    std::cout << "Uniform DD loc: " << UniformDiffuseIntensity << std::endl;
+   // std::cout << "Uniform DD loc: " << UniformDiffuseDirection<<std::endl;
+    //std::cout << "Uniform DD loc: " << UniformDiffuseIntensity << std::endl;
 
 
 }
@@ -128,7 +126,7 @@ GLuint Shader::GetUniformModel()
     return UniformModel;
 }
 
-//Returns uniform projection
+//Returns uniform variable
 GLuint Shader::GetUniformProjection()
 {
     return UniformProjection;

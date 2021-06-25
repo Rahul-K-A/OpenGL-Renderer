@@ -32,15 +32,17 @@ void Camera::KeyControl(bool* KeyArray,float DeltaTime)
 
 	if (KeyArray[GLFW_KEY_D])
 	{
-		Position += (Right * MovementSpeed *DeltaTime);
+		Position += (Right *Velocity );
 	}
 
 	if (KeyArray[GLFW_KEY_A])
 	{
-		Position = Position -(Right *Velocity);
+		Position -= (Right *Velocity);
 	}
 
-	/*if (KeyArray[GLFW_KEY_Q])
+
+	//Vertical movement
+	if (KeyArray[GLFW_KEY_Q])
 	{
 		Position = Position + (WorldUp * Velocity);
 	}
@@ -49,9 +51,9 @@ void Camera::KeyControl(bool* KeyArray,float DeltaTime)
 	if (KeyArray[GLFW_KEY_E])
 	{
 		Position = Position - (WorldUp * Velocity);
-	}*/
+	}
 
-	//std::cout << Position.x << " "<<Position.y <<" " << Position.z << std::endl;
+
 }
 
 
@@ -95,5 +97,5 @@ void Camera::Update()
 	Front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
 	Front = glm::normalize(Front);
 	Right = glm::normalize(glm::cross(Front, WorldUp));
-	Up = glm::normalize(glm::cross(Right,Front));
+	Up = glm::normalize(glm::cross(Right, Front));
 }

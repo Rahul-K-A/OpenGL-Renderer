@@ -32,13 +32,13 @@ private:
 	//Universal Y axis of Laptop  (Remember coordinate system changes for displays so our Z axis is actually Y axis of the display)
 	const glm::vec3 WorldUp=glm::vec3(0.0f,1.0f,0.0f);
 	//Rotation about Y axis of the display
-	GLfloat Yaw;
+	GLdouble Yaw;
 	//Rotation about Z axis of the display axis
-	GLfloat Pitch;
+	GLdouble Pitch;
 	//Movement speed rate
-	GLfloat MovementSpeed;
+	GLdouble MovementSpeed;
 	//Turn speed rate
-	GLfloat TurnSpeed;
+	GLdouble TurnSpeed;
 	
 
 };

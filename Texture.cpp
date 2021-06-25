@@ -20,7 +20,8 @@ void Texture::LoadTexture()
 	// Textures have to be bound to apply operations to them.
 	//Since images are 2D arrays of pixels, it will be bound to the GL_TEXTURE_2D target of the OpenGL state machine.
 	glBindTexture(GL_TEXTURE_2D, TextureID);
-	std::cout << "TextureID:" << TextureID << std::endl;
+	//std::cout << "TextureID:" << TextureID << std::endl;
+
 	//Texture coordinates are between 0 and 1
 	// refer https://stackoverflow.com/questions/10568390/difference-between-uv-and-st-texture-coordinates
 	//Wrapping handles how the texture should be sampled when a coordinate outside the range of 0 to 1 is given.

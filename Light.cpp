@@ -1,22 +1,25 @@
 #include "Light.h"
 
+//Refer https://learnopengl.com/Lighting/Basic-Lighting
+
 Light::Light()
-	:Colour{ glm::vec3(1.0f,0.0f,0.0f) }, AlphaIntensity{ 1.0f }, Direction{ glm::vec3(0.f,-1.f,0.f) }, DiffuseIntensity{ 1.0f }{}
+	:AmbientColour{ glm::vec3(1.0f,0.0f,0.0f) }, AmbientIntensity{ 1.0f }, DiffuseDirection{ glm::vec3(0.f,-1.f,0.f) }, DiffuseIntensity{ 1.0f }{}
 
 Light::Light(GLfloat Red, GLfloat Green, GLfloat Blue,GLfloat AlphaIntensity)
-	:Colour{glm::vec3(Red,Green,Blue)}, AlphaIntensity{ AlphaIntensity }, Direction{ glm::vec3(0.f,-1.f,0.f) }, DiffuseIntensity{ 1.0f } {}
+	:AmbientColour{glm::vec3(Red,Green,Blue)}, AmbientIntensity{ AlphaIntensity }, DiffuseDirection{ glm::vec3(0.f,-1.f,0.f) }, DiffuseIntensity{ 1.0f } {}
 
 Light::Light(GLfloat Red, GLfloat Green, GLfloat Blue, GLfloat AlphaIntensity, GLfloat xDirection, GLfloat yDirection, GLfloat zDirection, GLfloat DiffuseIntensity)
-	:Colour{glm::vec3(Red,Green,Blue)},AlphaIntensity{AlphaIntensity},Direction{glm::vec3(xDirection,yDirection,zDirection)},DiffuseIntensity{DiffuseIntensity}{}
+	:AmbientColour{glm::vec3(Red,Green,Blue)},AmbientIntensity{AlphaIntensity},DiffuseDirection{glm::vec3(xDirection,yDirection,zDirection)},DiffuseIntensity{DiffuseIntensity}{}
 
 Light::Light(glm::vec4 AmbientLightParams, glm::vec4 DiffuseLightParams)
-	:Colour{glm::vec3(AmbientLightParams.x,AmbientLightParams.y,AmbientLightParams.z)},AlphaIntensity{AmbientLightParams.w},Direction{glm::vec3(DiffuseLightParams.x,DiffuseLightParams.y,DiffuseLightParams.z)},DiffuseIntensity{DiffuseLightParams.w}{}
+	:AmbientColour{glm::vec3(AmbientLightParams.x,AmbientLightParams.y,AmbientLightParams.z)},AmbientIntensity{AmbientLightParams.w},DiffuseDirection{glm::vec3(DiffuseLightParams.x,DiffuseLightParams.y,DiffuseLightParams.z)},DiffuseIntensity{DiffuseLightParams.w}{}
 
-void Light::UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocation, GLuint DirectionUniformLocation, GLuint DiffuseIntensityUniformLocation)
+void Light::UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocation, GLuint DiffuseDirectionUniformLocation, GLuint DiffuseIntensityUniformLocation)
 {
-	glUniform3f(AmbientColorLocation, Colour.x, Colour.y, Colour.z);
-	glUniform1f(AmbientIntensityLocation, AlphaIntensity);
-	glUniform3f(DirectionUniformLocation, Direction.x, Direction.y, Direction.z);
+	//Passes light information into the shaders
+	glUniform3f(AmbientColorLocation, AmbientColour.x, AmbientColour.y, AmbientColour.z);
+	glUniform1f(AmbientIntensityLocation, AmbientIntensity);
+	glUniform3f(DiffuseDirectionUniformLocation, DiffuseDirection.x, DiffuseDirection.y, DiffuseDirection.z);
 	glUniform1f(DiffuseIntensityUniformLocation, DiffuseIntensity);
 }
 
