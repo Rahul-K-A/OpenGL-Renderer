@@ -18,6 +18,8 @@ public:
 	void MouseControl(double MouseX, double MouseY, float DeltaTime);
 	//Calculates the view from the camera for the given position and orientation
 	glm::mat4 CalculateCameraMatrix();
+	//Returns position of camera in world space
+	glm::vec3 GetCameraPosition();
 
 
 private:

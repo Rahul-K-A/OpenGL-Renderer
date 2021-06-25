@@ -31,6 +31,11 @@ public:
 	GLuint GetUniformDiffuseDirection();
 	//Returns uniform variable diffuse light intensity ID
 	GLuint GetUniformDiffuseIntensity();
+
+	GLuint GetUniformSpecularIntensity();
+	GLuint GetUniformSpecularShininess();
+	GLuint GetUniformCameraViewPosition();
+
 	//Enables the shader
 	void EnableShader();
 	//Disables the shader
@@ -50,6 +55,9 @@ private:
 	GLuint UniformAmbientLightIntensity;
 	GLuint UniformDiffuseDirection;
 	GLuint UniformDiffuseIntensity;
+	GLuint UniformSpecularIntensity;
+	GLuint UniformSpecularShininess;
+	GLuint UniformCameraViewPosition;
 	//Adds the shader to the program
 	GLuint AddShader(GLuint TheProgram, const char* ShaderCode, GLenum ShaderType);
 	//Compiles the shader

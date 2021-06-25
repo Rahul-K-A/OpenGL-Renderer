@@ -90,6 +90,11 @@ glm::mat4 Camera::CalculateCameraMatrix()
 	
 }
 
+glm::vec3 Camera::GetCameraPosition()
+{
+	return Position;
+}
+
 void Camera::Update()
 {
 	Front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));

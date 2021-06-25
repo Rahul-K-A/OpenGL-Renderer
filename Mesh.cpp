@@ -2,7 +2,10 @@
 
 //Constructor
 Mesh::Mesh()
-    :Vao{ 0 }, Vbo{ 0 }, Ibo{ 0 }, IndexCount{ 0 }{}
+    :Vao{ 0 }, 
+    Vbo{ 0 }, 
+    Ibo{ 0 },
+    IndexCount{ 0 }{}
 
 //Creates Mesh from indices and vertices
 void Mesh::CreateMesh(GLfloat* Vertices, unsigned int* Indices, unsigned int NumberOfVertices, unsigned int NumberOfIndices)

@@ -114,8 +114,10 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
     UniformAmbientLightIntensity= glGetUniformLocation(ShaderId, "dLight.AlphaIntensity");
     UniformDiffuseDirection = glGetUniformLocation(ShaderId, "dLight.Direction");
     UniformDiffuseIntensity = glGetUniformLocation(ShaderId, "dLight.DiffuseIntensity");
-   // std::cout << "Uniform DD loc: " << UniformDiffuseDirection<<std::endl;
-    //std::cout << "Uniform DD loc: " << UniformDiffuseIntensity << std::endl;
+    UniformSpecularIntensity = glGetUniformLocation(ShaderId, "material.SpecularIntensity");
+    UniformSpecularShininess = glGetUniformLocation(ShaderId, "material.Shininess");
+    UniformCameraViewPosition = glGetUniformLocation(ShaderId, "CameraViewPosition");
+
 
 
 }
@@ -157,6 +159,21 @@ GLuint Shader::GetUniformDiffuseIntensity()
     return UniformDiffuseIntensity;
 }
 
+GLuint Shader::GetUniformSpecularIntensity()
+{
+    return UniformSpecularIntensity;
+}
+
+GLuint Shader::GetUniformSpecularShininess()
+{
+    return UniformSpecularShininess;
+}
+
+GLuint Shader::GetUniformCameraViewPosition()
+{
+    return UniformCameraViewPosition;
+}
+
 //Enables shaders
 void Shader::EnableShader()
 {
@@ -185,4 +202,3 @@ Shader::~Shader()
 {
     ClearShaders();
 }
-

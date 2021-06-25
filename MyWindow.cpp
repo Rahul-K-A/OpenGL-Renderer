@@ -3,19 +3,33 @@
 
 //Constructors
 MyWindow::MyWindow(GLint Width, GLint Height)
-    :MainWindow{ NULL }, BufferHeight{ 0 }, BufferWidth{ 0 }, WindowWidth{ 0 }, WindowHeight{ 0 },xChange{0},yChange{0},LastX{0},LastY{0},MouseNotMoved{true}
+    :MainWindow{ NULL },
+    BufferHeight{ 0 },
+    BufferWidth{ 0 },
+    WindowWidth{ Width },
+    WindowHeight{ Height},
+    xChange{0},
+    yChange{0},
+    LastX{0},
+    LastY{0},
+    MouseNotMoved{true}
 { 
     KeyPressed[0] = { false };
-    WindowWidth = Width;
-    WindowHeight = Height;
 }
 
 MyWindow::MyWindow()
-    :MainWindow{ NULL }, BufferHeight{ 0 }, BufferWidth{ 0 }, WindowWidth{ 0 }, WindowHeight{ 0 }, xChange{ 0 }, yChange{ 0 }, LastX{ 0 }, LastY{ 0 }, MouseNotMoved{ true }
+    :MainWindow{ NULL }, 
+    BufferHeight{ 0 },
+    BufferWidth{ 0 },
+    WindowWidth{ 640},
+    WindowHeight{ 480 },
+    xChange{ 0 },
+    yChange{ 0 },
+    LastX{ 0 },
+    LastY{ 0 },
+    MouseNotMoved{ true }
 {
     KeyPressed[0] = { false };
-    WindowWidth = 640;
-    WindowHeight = 480;
 }
 
 //Destructor

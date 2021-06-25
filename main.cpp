@@ -1,4 +1,5 @@
 #define STB_IMAGE_IMPLEMENTATION
+
 #include <iostream>
 #include "Mesh.h"
 #include "Shader.h"
@@ -10,6 +11,7 @@
 #include <vector>
 #include "Texture.h"
 #include "Light.h"
+#include "Material.h"
 
 //Window object
 MyWindow Window(800, 600);
@@ -19,8 +21,12 @@ Camera Cam(glm::vec3(0.0f, 0.0f, 0.0f),-90.0f,0.0f,4.0f,40.0f);
 
 
 //Light
-Light DLight(glm::vec4(1.0f, 1.0f, 1.0f,0.2f), glm::vec4(2.0f,-1.0f,-2.0f,1.0f));
+Light DLight(glm::vec4(1.0f, 1.0f, 1.0f,0.1f), glm::vec4(2.0f,-1.0f,-2.0f,0.1f));
 float Intensity;
+
+//Material
+Material ShinyMaterial(1.0f,32);
+Material DullMaterial(0.3f, 4);
 
 //Vectors containing Mesh pointer and shader pointer
 std::vector<Mesh*> MeshPointers;
@@ -34,6 +40,9 @@ GLuint UniformCol;
 GLuint UniformAlpha;
 GLuint UniformDiffuseDir;
 GLuint UniformDiffuseIntensity;
+GLuint UniformSpecularIntensity;
+GLuint UniformSpecularShininess;
+GLuint UniformCameraViewPosition;
 
 
 //Textures
@@ -194,14 +203,27 @@ void CreateShaders()
     Shader* Shader1 = new Shader();
     Shader1->CreateShadersFromFiles(vShader, fShader);
     ShaderPointers.push_back(Shader1);
+
     UniformProjection = ShaderPointers[0]->GetUniformProjection();
+
     UniformModel = ShaderPointers[0]->GetUniformModel();
+
     UniformCameraView = ShaderPointers[0]->GetUniformView();
+
     UniformCol = ShaderPointers[0]->GetUniformAmbientLightColour();
+
     UniformAlpha = ShaderPointers[0]->GetUniformAmbientLightIntensity();
+
     UniformDiffuseDir = ShaderPointers[0]->GetUniformDiffuseDirection();
+
     UniformDiffuseIntensity = ShaderPointers[0]->GetUniformDiffuseIntensity();
-    //std::cout << "\nmain Uniform DD loc: " << UniformDiffuseDir << std::endl;
+
+    UniformSpecularIntensity=ShaderPointers[0]->GetUniformSpecularIntensity();
+
+    UniformSpecularShininess=ShaderPointers[0]->GetUniformSpecularShininess();
+
+    UniformCameraViewPosition=ShaderPointers[0]->GetUniformCameraViewPosition();
+    //std::cout << "\nmain Uniform DD loc: " << UniformDr << std::endl;
     //std::cout << "main Uniform Diffuse intensity: " << UniformDiffuseIntensity << std::endl;
 
 }
@@ -266,14 +288,19 @@ int main()
 
         //Render Mesh 1
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
-        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 3.0f));
-        model = glm::rotate(model, Offset * ToRadians, glm::vec3(0.f, 1.f, 0.f));
+        //model = glm::scale(model, glm::vec3(2.0f, 2.0f, 3.0f));
+        //model = glm::rotate(model, Offset * ToRadians, glm::vec3(0.f, 1.f, 0.f));
         glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(UniformCameraView, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
+        glm::vec3 POs = Cam.GetCameraPosition();
+        glUniform3f(UniformCameraViewPosition, POs.x,POs.y, POs.z);
+
         
-        Offset += Increment;
+        //Offset += Increment;
         BrickTexture.UseTexture();
+        ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
+
         MeshPointers[0]->RenderMesh();
        
 
@@ -282,13 +309,15 @@ int main()
 
         DLight.UseLight(UniformCol, UniformAlpha, UniformDiffuseDir, UniformDiffuseIntensity);
         model = glm::translate(model, glm::vec3(0.0f, 5.0f, -5.0f));
-        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 3.0f));
+        //model = glm::scale(model, glm::vec3(2.0f, 2.0f, 3.0f));
         glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(UniformCameraView, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
 
         DirtTexture.UseTexture();
+        DullMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
         MeshPointers[1]->RenderMesh();
+        
 
         //Disable shader
         ShaderPointers[0]->DisableShader();
