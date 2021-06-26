@@ -31,9 +31,11 @@ public:
 	GLuint GetUniformDiffuseDirection();
 	//Returns uniform variable diffuse light intensity ID
 	GLuint GetUniformDiffuseIntensity();
-
+	//Returns uniform variable specular intensity ID
 	GLuint GetUniformSpecularIntensity();
+	//Returns uniform variable specular shininess intensity ID
 	GLuint GetUniformSpecularShininess();
+	//Returns uniform variable camera view ID
 	GLuint GetUniformCameraViewPosition();
 
 	//Enables the shader
@@ -51,13 +53,17 @@ private:
 	//Uniform variable projection location ID
 	GLuint UniformProjection;
 	GLuint UniformView;
+
 	GLuint UniformAmbientLightColour;
 	GLuint UniformAmbientLightIntensity;
+
 	GLuint UniformDiffuseDirection;
 	GLuint UniformDiffuseIntensity;
+
 	GLuint UniformSpecularIntensity;
 	GLuint UniformSpecularShininess;
 	GLuint UniformCameraViewPosition;
+
 	//Adds the shader to the program
 	GLuint AddShader(GLuint TheProgram, const char* ShaderCode, GLenum ShaderType);
 	//Compiles the shader

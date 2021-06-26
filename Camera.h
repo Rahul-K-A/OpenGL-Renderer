@@ -13,9 +13,9 @@ public:
 	//Updates position of camera every frame
 	void Update();
 	//Takes array of all keys from a MyWindow instance and updates the camera position every frame
-	void KeyControl(bool* KeyArray,float DeltaTime);
+	void KeyControl(bool* KeyArray,double DeltaTime);
 	//Takes array of all keys from a MyWindow instance and updates the camera orientation every frame
-	void MouseControl(double MouseX, double MouseY, float DeltaTime);
+	void MouseControl(double MouseX, double MouseY, double DeltaTime);
 	//Calculates the view from the camera for the given position and orientation
 	glm::mat4 CalculateCameraMatrix();
 	//Returns position of camera in world space

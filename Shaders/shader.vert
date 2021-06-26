@@ -16,8 +16,9 @@
 
   void main()
   {
+     //Position of object in world space
     gl_Position= projection*view*model*vec4(position,1.f);
- 
+    //Sending texture data to fragment shader
     TextureData=TextureCoordinates;
 
 

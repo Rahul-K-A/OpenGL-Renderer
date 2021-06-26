@@ -2,8 +2,18 @@
 
 
 //Constructor
-Shader::Shader() :ShaderId{ 0 }, UniformModel{ 0 }, UniformProjection{ 0 },UniformView{0},UniformAmbientLightColour{0},UniformAmbientLightIntensity{0},UniformDiffuseDirection{0},UniformDiffuseIntensity{0}
-{}
+Shader::Shader() 
+   :ShaderId{ 0 }, 
+    UniformModel{ 0 },
+    UniformProjection{ 0 },
+    UniformView{0},
+    UniformAmbientLightColour{0},
+    UniformAmbientLightIntensity{0},
+    UniformDiffuseDirection{0},
+    UniformDiffuseIntensity{0},
+    UniformSpecularIntensity{0},
+    UniformCameraViewPosition{0},
+    UniformSpecularShininess{GLuint(0)}{}
 
 //Create shaders from text directly
 void Shader::CreateShadersFromText(const char* vShaderCode, const char* fShaderCode)
@@ -111,7 +121,7 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
     UniformProjection = glGetUniformLocation(ShaderId, "projection");
     UniformView= glGetUniformLocation(ShaderId, "view");
     UniformAmbientLightColour = glGetUniformLocation(ShaderId, "dLight.LightColour");
-    UniformAmbientLightIntensity= glGetUniformLocation(ShaderId, "dLight.AlphaIntensity");
+    UniformAmbientLightIntensity= glGetUniformLocation(ShaderId, "dLight.AmbientIntensity");
     UniformDiffuseDirection = glGetUniformLocation(ShaderId, "dLight.Direction");
     UniformDiffuseIntensity = glGetUniformLocation(ShaderId, "dLight.DiffuseIntensity");
     UniformSpecularIntensity = glGetUniformLocation(ShaderId, "material.SpecularIntensity");

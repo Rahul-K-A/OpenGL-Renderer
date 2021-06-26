@@ -10,12 +10,12 @@ Camera::Camera(glm::vec3 InitialPosition, GLfloat InitialYaw, GLfloat InitialPit
 }
 
 //Handles key input and movement control
-void Camera::KeyControl(bool* KeyArray,float DeltaTime)
+void Camera::KeyControl(bool* KeyArray,double DeltaTime)
 {
 
 	//GLFW_KEY_  is a preprocessor directive which substitutes the directive with the ASCII value of the key. 
 	//GLFW_KEY_W will be replaced by 87
-	float Velocity = MovementSpeed * DeltaTime;
+	 float Velocity = (float)(MovementSpeed * DeltaTime);
 	//Basically add velocity in the direction of the front vector to move forward. 
 	//To move backward added velocity in the direction opposite to front vector
 	if (KeyArray[GLFW_KEY_W])
@@ -58,12 +58,12 @@ void Camera::KeyControl(bool* KeyArray,float DeltaTime)
 
 
 //Handles mouse input 
-void Camera::MouseControl(double MouseX, double MouseY, float DeltaTime)
+void Camera::MouseControl(double MouseX, double MouseY, double DeltaTime)
 {
 	//Magic numbers are bad but couldnt help it with this one. 
 	//Delta time *2 with a turn speed of 40.0 , DeltaTime*2 gives the optimal rate of turn
 
-	double MovementSpeed = (double)TurnSpeed * (double)DeltaTime;
+	double MovementSpeed = TurnSpeed * DeltaTime;
 	MouseX *= MovementSpeed;
 	MouseY *= MovementSpeed;
 
@@ -97,9 +97,9 @@ glm::vec3 Camera::GetCameraPosition()
 
 void Camera::Update()
 {
-	Front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-	Front.y = sin(glm::radians(Pitch));
-	Front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	Front.x = (float)(cos(glm::radians(Yaw)) * cos(glm::radians(Pitch)));
+	Front.y = (float)sin(glm::radians(Pitch));
+	Front.z = (float)(sin(glm::radians(Yaw)) * cos(glm::radians(Pitch)));
 	Front = glm::normalize(Front);
 	Right = glm::normalize(glm::cross(Front, WorldUp));
 	Up = glm::normalize(glm::cross(Right, Front));

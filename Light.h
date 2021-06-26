@@ -12,7 +12,7 @@ public:
 	//Enables light during rendering and passes lighting information to shaders
 	void UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocation,GLuint DirectionUniformLocation,GLuint DiffuseIntensityUniformLocation);
 
-private:
+protected:
 	//Colour vector
 	glm::vec3 AmbientColour;
 	//Color Intensity 
