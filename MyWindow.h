@@ -11,7 +11,7 @@ public:
 	MyWindow(GLint width, GLint height);
 	//Destructor
 	~MyWindow();
-	//Create Window 
+	//Create Window
 	int Initialise();
 	//Create Viewport and map to window
 	void CreateViewport();
@@ -27,7 +27,7 @@ public:
 	void PollWindowEvents();
 	//Create callback functions when values are updated in the window
 	void CreateCallbacks();
-	//Sets true in the Key array for what key is pressed 
+	//Sets true in the Key array for what key is pressed
 	//Key position in the array is defined by the ASCII value of the pressed key
 	void SetKey(int KeyNumber);
 	//Returns the array of all keys
@@ -42,7 +42,7 @@ public:
 	void SetLastY(float Value);
 	//Gets the last Y position of the mouse
 	double GetLastY();
-    //Calculates the change in X value between frames
+	//Calculates the change in X value between frames
 	void CalcXChange(float Value);
 	//Calculates the change in Y value between frames
 	void CalcYChange(float Value);
@@ -56,9 +56,6 @@ public:
 	//Sets MouseNotMoved as false
 	void MouseHasMoved();
 
-	
-
-
 private:
 	//Window size
 	GLint WindowWidth, WindowHeight;
@@ -68,7 +65,7 @@ private:
 	GLint BufferWidth, BufferHeight;
 	//1024 bool array which corresponds to the 1024 ASCII values
 	bool KeyPressed[1024] = { false };
-    
+
 	//X value of mouse position in the previous frame
 	GLdouble LastX;
 	//Y value of mouse position in the previous frame
@@ -78,9 +75,9 @@ private:
 	//Change in Y value of mouse position between two frames
 	GLdouble yChange;
 	//To store if the mouse has moved within the window for the first time
-	bool MouseNotMoved=true;
+	bool MouseNotMoved = true;
 
-    //Static function to make key and mouse handling independant of any instances.(Static call not really useful since these are to be used within the class itself)
+	//Static function to make key and mouse handling independant of any instances.(Static call not really useful since these are to be used within the class itself)
 	static void HandleKeys(
 		GLFWwindow* WindowToHandle,  //Window to handle keys from
 		int Key,  //Ascii value of pressed key
@@ -92,8 +89,4 @@ private:
 	static void HandleMouse(GLFWwindow* WindowToHandle,  //WIndow to handle mouse movements from
 		double CurrentMouseXPosition,   //Current mouse X position
 		double CurrentMouseYPosition);    //Current mouse Y position
-	
-
-
 };
-

@@ -69,4 +69,3 @@ private:
 	//Compiles the shader
 	void CompileShaders(const char* vShaderCode, const char* fShaderCode);
 };
-

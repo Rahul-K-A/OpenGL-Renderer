@@ -3,28 +3,19 @@
 #include "glm/glm.hpp"
 class Light
 {
-	
 public:
 	//Constructors
 	Light();
-	Light(glm::vec4 AmbientLightParams,glm::vec4 DiffuseLightParams);
+	Light(glm::vec4 AmbientLightParams, GLfloat DiffuseIntensity);
 
 	//Enables light during rendering and passes lighting information to shaders
-	void UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocation,GLuint DirectionUniformLocation,GLuint DiffuseIntensityUniformLocation);
+	//virtual void UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocation,GLuint DiffuseIntensityUniformLocation);
 
 protected:
 	//Colour vector
 	glm::vec3 AmbientColour;
-	//Color Intensity 
+	//Color Intensity
 	GLfloat AmbientIntensity;
-
-
-	//Light direction vector
-    glm::vec3 DiffuseDirection;
 	//Directional light intensity
 	GLfloat DiffuseIntensity;
-	
-
-
 };
-

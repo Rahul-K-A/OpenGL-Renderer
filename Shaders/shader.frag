@@ -46,11 +46,13 @@
 
     if(DiffuseFactor>0.0f)
     {
-        vec3 FragmentToCameraViewDirection= normalize(CameraViewPosition-FragmentPosition);
+         //Direction from vector a to vector b is normalize(b-a)
+         //We find the direction of fragment from the point of the camera view
+        vec3 CameraViewToFragmentDirection= normalize(FragmentPosition-CameraViewPosition);
 
-        vec3 ReflectedVertexDirection= normalize( reflect( -dLight.Direction,normalize(Normal) ) );
+        vec3 ReflectedVertexDirection= normalize( reflect( dLight.Direction,normalize(Normal) ) );
    
-        float SpecularFactor= pow(max (dot(FragmentToCameraViewDirection, ReflectedVertexDirection), 0.0), material.Shininess);
+        float SpecularFactor= pow(max (dot(CameraViewToFragmentDirection, ReflectedVertexDirection), 0.0), material.Shininess);
         if(SpecularFactor>0.0f)
         {
           SpecularFactor=pow(SpecularFactor, material.Shininess );

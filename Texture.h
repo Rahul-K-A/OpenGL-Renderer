@@ -3,27 +3,25 @@
 #include "stb_image.h"
 #include <iostream>
 
-
 //https://learnopengl.com/Getting-started/Textures
 
 class Texture
 {
-//Constructor
-public:	
+	//Constructor
+public:
 	Texture();
 	Texture(char* Path);
-//Destructor
+	//Destructor
 	~Texture();
 
 	void LoadTexture();
 	void UseTexture();
 	void ClearTexture();
-	void setPath(char *Path);
+	void setPath(char* Path);
 private:
 	GLuint TextureID;
 	int Width,  //X cooordinate of texture
 		Height,  //Y coordinate pf tecture
-		NumberOfChannels; 
+		NumberOfChannels;
 	char* FileLocation;
 };
-

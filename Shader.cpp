@@ -1,9 +1,8 @@
 #include "Shader.h"
 
-
 //Constructor
-Shader::Shader() 
-   :ShaderId{ 0 }, 
+Shader::Shader()
+   :ShaderId{ 0 },
     UniformModel{ 0 },
     UniformProjection{ 0 },
     UniformView{0},
@@ -13,7 +12,7 @@ Shader::Shader()
     UniformDiffuseIntensity{0},
     UniformSpecularIntensity{0},
     UniformCameraViewPosition{0},
-    UniformSpecularShininess{GLuint(0)}{}
+    UniformSpecularShininess{0}{}
 
 //Create shaders from text directly
 void Shader::CreateShadersFromText(const char* vShaderCode, const char* fShaderCode)
@@ -45,12 +44,12 @@ std::string Shader::ReadFile(const char* FilePath)
     {
         return "";
     }
-    //String to read the file 
+    //String to read the file
     std::string Line = "";
     //While end of file is not reached
     while (!FileStream.eof())
     {
-        ///Get each line of code from the shader file   
+        ///Get each line of code from the shader file
         std::getline(FileStream, Line);
         //Add newline to the end of each line and append it to content
         content.append(Line + "\n");
@@ -127,9 +126,6 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
     UniformSpecularIntensity = glGetUniformLocation(ShaderId, "material.SpecularIntensity");
     UniformSpecularShininess = glGetUniformLocation(ShaderId, "material.Shininess");
     UniformCameraViewPosition = glGetUniformLocation(ShaderId, "CameraViewPosition");
-
-
-
 }
 
 //Returns uniform model
@@ -205,7 +201,6 @@ void Shader::ClearShaders()
     UniformModel = 0;
     UniformProjection = 0;
 }
-
 
 //Destructor
 Shader::~Shader()
