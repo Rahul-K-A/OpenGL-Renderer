@@ -10,9 +10,7 @@ DirectionalLight::DirectionalLight(glm::vec4 AmbientLightParams, glm::vec4 Diffu
 
 void DirectionalLight::UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocation,GLuint DiffuseDirectionUniformLoc, GLuint DiffuseIntensityUniformLocation)
 {	//Passes light information into the shaders
-	
+	Light::UseLight(AmbientColorLocation, AmbientIntensityLocation, DiffuseIntensityUniformLocation);
 	glUniform3f(AmbientColorLocation, AmbientColour.x, AmbientColour.y, AmbientColour.z);
-	glUniform1f(AmbientIntensityLocation, AmbientIntensity);
 	glUniform3f(DiffuseDirectionUniformLoc, DiffuseDirection.x, DiffuseDirection.y, DiffuseDirection.z);
-	glUniform1f(DiffuseIntensityUniformLocation, DiffuseIntensity);
 }

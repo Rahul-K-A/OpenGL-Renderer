@@ -3,6 +3,9 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "DirectionalLight.h"
+#include "PointLight.h"
+#include "CommonValues.h"
 
 class Shader
 {
@@ -38,6 +41,10 @@ public:
 	//Returns uniform variable camera view ID
 	GLuint GetUniformCameraViewPosition();
 
+	void SetDirectionalLight(DirectionalLight *TheLight);
+	void SetPointLight(PointLight* TheLight, GLuint PointLightCount);
+
+	void EnableDirectionalLight();
 	//Enables the shader
 	void EnableShader();
 	//Disables the shader
@@ -54,15 +61,36 @@ private:
 	GLuint UniformProjection;
 	GLuint UniformView;
 
-	GLuint UniformAmbientLightColour;
-	GLuint UniformAmbientLightIntensity;
-
-	GLuint UniformDiffuseDirection;
-	GLuint UniformDiffuseIntensity;
+	
 
 	GLuint UniformSpecularIntensity;
 	GLuint UniformSpecularShininess;
 	GLuint UniformCameraViewPosition;
+	GLuint UniformPointLightCount;
+
+	GLuint PointLightCount;
+
+	struct {
+		GLuint UniformAmbientLightColour;
+		GLuint UniformAmbientLightIntensity;
+		GLuint UniformDiffuseIntensity;
+		GLuint UniformCoeffA;
+		GLuint UniformCoeffB;
+		GLuint UniformCoeffC;
+		GLuint UniformLightPosition;
+
+	}uniformPLight[MAX_POINT_LIGHTS];
+
+
+	struct {
+		GLuint UniformAmbientLightColour;
+		GLuint UniformAmbientLightIntensity;
+		GLuint UniformDiffuseDirection;
+        GLuint UniformDiffuseIntensity;
+	} uniformDLight;
+
+
+	DirectionalLight * dLight;
 
 	//Adds the shader to the program
 	GLuint AddShader(GLuint TheProgram, const char* ShaderCode, GLenum ShaderType);

@@ -12,10 +12,10 @@ Light::Light(glm::vec4 AmbientLightParams,GLfloat DiffuseIntensity)
 	AmbientIntensity{ AmbientLightParams.w },
 	DiffuseIntensity{DiffuseIntensity}{}
 
-//void Light::UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocation,GLuint DiffuseIntensityUniformLocation)
-//{
-//	//Passes light information into the shaders
-//	glUniform3f(AmbientColorLocation, AmbientColour.x, AmbientColour.y, AmbientColour.z);
-//	glUniform1f(AmbientIntensityLocation, AmbientIntensity);
-//	glUniform1f(DiffuseIntensityUniformLocation, DiffuseIntensity);
-//}
+void Light::UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocation,GLuint DiffuseIntensityUniformLocation)
+{
+	//Passes light information into the shaders
+	glUniform3f(AmbientColorLocation, AmbientColour.x, AmbientColour.y, AmbientColour.z);
+	glUniform1f(AmbientIntensityLocation, AmbientIntensity);
+	glUniform1f(DiffuseIntensityUniformLocation, DiffuseIntensity);
+}
