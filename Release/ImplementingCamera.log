@@ -1,0 +1,8 @@
+﻿  main.cpp
+C:\Users\rahul\Documents\Visual Studio 2019\Projects\ImplementingCamera\main.cpp(186,21): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+  Generating code
+  0 of 527 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  ImplementingCamera.vcxproj -> C:\Users\rahul\Documents\Visual Studio 2019\Projects\ImplementingCamera\Release\ImplementingCamera.exe

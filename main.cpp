@@ -53,7 +53,7 @@ GLuint UniformDiffuseDir;
 GLuint UniformDiffuseIntensity;
 GLuint UniformSpecularIntensity;
 GLuint UniformSpecularShininess;
-GLuint UniformCameraViewPosition;
+GLuint UniformCameraPosition;
 
 //Textures
 Texture BrickTexture, DirtTexture,PlainTexture;
@@ -81,6 +81,8 @@ void CreateObjects()
 		//The order in which the indexed vertices are to be rendered in sets of three
 		//The order in which indices are called affects the normal of the mesh
 		//Reversing the order of indices inverts the normals
+		//Had a bug where normals were inverted so adopted this order
+		//Might have to reconsider when adding ASSIMP
 
 		1, 3, 0,
 		2, 3, 1,
@@ -112,12 +114,12 @@ void CreateObjects()
 		10.0f, 0.0f, 10.0f,		10.0f, 10.0f,	0.0f, 0.0f, 0.0f
 	};
 
-	Mesh* Obj1 = new Mesh();
-	Obj1->CreateMesh(Vertices, Indices, 32, 12);
-	MeshPointers.push_back(Obj1);
-	Mesh* Obj2 = new Mesh();
-	Obj2->CreateMesh(floorVertices, floorIndices, 32, 6);
-	MeshPointers.push_back(Obj2);
+	Mesh* Obj = new Mesh();
+	Obj->CreateMesh(Vertices, Indices, 32, 12);
+	MeshPointers.push_back(Obj);
+    Obj = new Mesh();
+	Obj->CreateMesh(floorVertices, floorIndices, 32, 6);
+	MeshPointers.push_back(Obj);
 }
 
 //Function which creates shader
@@ -138,7 +140,7 @@ void CreateShaders()
 
 	UniformSpecularShininess = ShaderPointers[0]->GetUniformSpecularShininess();
 
-	UniformCameraViewPosition = ShaderPointers[0]->GetUniformCameraViewPosition();
+	UniformCameraPosition = ShaderPointers[0]->GetUniformCameraPosition();
 }
 
 //Function which initialises window
@@ -161,12 +163,13 @@ int main()
 	//Set texture paths
 	BrickTexture.setPath((char*)("Textures/brick.png"));
 	BrickTexture.LoadTexture();
-	DirtTexture.setPath((char*)("Textures/dirt.png"));
-	DirtTexture.LoadTexture();
+	//DirtTexture.setPath((char*)("Textures/dirt.png"));
+	//DirtTexture.LoadTexture();
 	PlainTexture.setPath((char*)("Textures/plain.png"));
 	PlainTexture.LoadTexture();
 
 	ShaderPointers[0]->SetDirectionalLight(&DLight);
+	ShaderPointers[0]->SetPointLight(PLightArr, MAX_POINT_LIGHTS);
 
 	float Offset = 0.00f;
 	float Increment = 0.001f;
@@ -197,7 +200,8 @@ int main()
 		//Enable light
 		//DLight.UseLight(UniformAmbientCol, UniformAmbientIntensity,UniformDiffuseDir, UniformDiffuseIntensity);
 		ShaderPointers[0]->EnableDirectionalLight();
-		ShaderPointers[0]->SetPointLight(PLightArr, MAX_POINT_LIGHTS);
+		ShaderPointers[0]->EnablePointLight();
+		
 		
 
 		//Render Mesh 1
@@ -206,10 +210,10 @@ int main()
 		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
-		glm::vec3 POs = Cam.GetCameraPosition();
-		glUniform3f(UniformCameraViewPosition, POs.x, POs.y, POs.z);
+		glm::vec3 CameraPosition = Cam.GetCameraPosition();
+		glUniform3f(UniformCameraPosition, CameraPosition.x, CameraPosition.y, CameraPosition.z);
 
-		Offset += Increment;
+		//Offset += Increment;
 		if (abs(Offset) > 5.f)
 		{
 			Increment *= -1;

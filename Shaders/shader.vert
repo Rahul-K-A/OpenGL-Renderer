@@ -26,7 +26,7 @@
     //TLDR: Normals get distorted due to the projection from the camera causing non uniform scaling.taking transpose of the inverse rectifies this.
     
     Normal=mat3(transpose(inverse(model)))*DiffuseLightVec;
-
+    //Posiiton of face with respect to the camera POV
     FragmentPosition=(model * vec4(position,1.0f)).xyz;
 
   }

@@ -12,6 +12,6 @@ public:
 private:
 	//Light direction vector
 	glm::vec3 LightPosition;
-	//a,b,c are coeffs of x^2,x,and the constant respectively
+	//a,b,c are coeffs of x^2,x,and the constant respectively.These are for attenuation of the light
 	GLfloat a, b, c;
 };
