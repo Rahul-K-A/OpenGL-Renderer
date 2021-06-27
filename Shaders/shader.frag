@@ -9,21 +9,21 @@
 
   const int MAX_POINT_LIGHTS=3;
 
-  struct LightBase{
+  struct Light{
     vec3 LightColour;
     float AmbientIntensity;
     float DiffuseIntensity;
   };
 
   struct DirectionalLight{
-    LightBase LBase;
+    Light LBase;
     vec3 Direction;
   };
 
 
 
   struct PointLight{
-    LightBase LBase;
+    Light LBase;
     vec3 LightPosition;
     float A;
     float B;
@@ -50,7 +50,7 @@
   
 
 
-   vec4 CalculateLightByDirection(LightBase Light,vec3 Direction)
+   vec4 CalculateLightByDirection(Light Light,vec3 Direction)
   {
    //Calculates ambient lighting
     vec4 AmbientLight= vec4(Light.LightColour,1.0f)*Light.AmbientIntensity;
@@ -72,7 +72,7 @@
          //We find the direction of fragment from the point of the camera view
         vec3 CameraViewToFragmentDirection= normalize(CameraViewPosition-FragmentPosition);
 
-        vec3 ReflectedVertexDirection= normalize( reflect(-Direction,normalize(Normal) ) );
+        vec3 ReflectedVertexDirection= normalize( -reflect(Direction,normalize(Normal) ) );
    
         float SpecularFactor= pow(max (dot(CameraViewToFragmentDirection, ReflectedVertexDirection), 0.0), material.Shininess);
             if(SpecularFactor>0.0f)
@@ -97,7 +97,7 @@
     vec4 TotalColour=vec4(0.0f,0.0f,0.0f,0.0f);
     for (int i=0;i<PointLightCount;i++)
     {
-        vec3 LightToFragmentDirection= FragmentPosition-pLight[i].LightPosition;
+        vec3 LightToFragmentDirection=pLight[i].LightPosition-FragmentPosition;
         float Distance=length(LightToFragmentDirection);
         LightToFragmentDirection=normalize(LightToFragmentDirection);
         vec4 PLightColour=CalculateLightByDirection(pLight[i].LBase,LightToFragmentDirection);

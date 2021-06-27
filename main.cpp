@@ -26,8 +26,9 @@ DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f), glm::vec4(0.0f, 0.0f,
 float Intensity;
 
 //Material
-Material ShinyMaterial(10.0f, 256);
-Material DullMaterial(0.3f, 4);
+//Currently set to unrealistic values to exagerrate specular lighting
+Material ShinyMaterial(10.0f, 32);
+Material DullMaterial(10.f, 4);
 
 //Vectors containing Mesh pointer and shader pointer
 std::vector<Mesh*> MeshPointers;
@@ -36,9 +37,9 @@ std::vector<Shader*> ShaderPointers;
 
 //PointLights
 PointLight PLightArr[MAX_POINT_LIGHTS] = {
- PointLight(glm::vec4(1.f, 0.f, 0.f, 1.f),  1.f , glm::vec3(0.f,0.0f, 0.0f) , glm::vec3(0.3f, 0.2f, 0.1f)),
- PointLight(glm::vec4(0.f, 1.f, 0.f, 1.f), 1.f, glm::vec3(-4.f, .0f, 0.f), glm::vec3(0.3f, 0.2f, 0.1f)),
- PointLight(glm::vec4(0.f, 0.f, 1.f, 1.f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
+ PointLight(glm::vec4(1.f, 0.f, 0.f, .2f),  1.f , glm::vec3(0.f,0.0f, 0.0f) , glm::vec3(0.3f, 0.2f, 0.1f)),
+ PointLight(glm::vec4(0.f, 1.f, 0.f, .2f), 1.f, glm::vec3(-4.f, .0f, 0.f), glm::vec3(0.3f, 0.2f, 0.1f)),
+ PointLight(glm::vec4(0.f, 0.f, 1.f, .2f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
 };
 
 
@@ -76,11 +77,15 @@ static const char* fShader = "Shaders/shader.frag";
 void CreateObjects()
 {
 	unsigned int Indices[] = {
+
 		//The order in which the indexed vertices are to be rendered in sets of three
-		0, 3, 1,
-		1, 3, 2,
-		2, 3, 0,
-		0, 1, 2
+		//The order in which indices are called affects the normal of the mesh
+		//Reversing the order of indices inverts the normals
+
+		1, 3, 0,
+		2, 3, 1,
+		0, 3, 2,
+		2, 1, 0
 	};
 
 	//x,y,z are the vertices of the mesh, u and v are texture wrapping params. nx,ny,nz are normals to the mesh used for lighting
@@ -93,19 +98,19 @@ void CreateObjects()
 		 0.0f , 1.0f   ,0.0f ,  0.5f  , 1.0f ,     0.0f , 0.0f ,  0.0f               //3
 	};
 
+
+	//The next shape is a plane which represents a floor
 	unsigned int floorIndices[] = {
 		0, 2, 1,
 		1, 2, 3
 	};
 
 	GLfloat floorVertices[] = {
-		-10.0f, 0.0f, -10.0f,	0.0f, 0.0f,		0.0f, -1.0f, 0.0f,
-		10.0f, 0.0f, -10.0f,	10.0f, 0.0f,	0.0f, -1.0f, 0.0f,
-		-10.0f, 0.0f, 10.0f,	0.0f, 10.0f,	0.0f, -1.0f, 0.0f,
-		10.0f, 0.0f, 10.0f,		10.0f, 10.0f,	0.0f, -1.0f, 0.0f
+		-10.0f, 0.0f, -10.0f,	0.0f, 0.0f,		0.0f, 0.0f, 0.0f,
+		10.0f, 0.0f, -10.0f,	10.0f, 0.0f,	0.0f, 0.0f, 0.0f,
+		-10.0f, 0.0f, 10.0f,	0.0f, 10.0f,	0.0f, 0.0f, 0.0f,
+		10.0f, 0.0f, 10.0f,		10.0f, 10.0f,	0.0f, 0.0f, 0.0f
 	};
-	//Calculates average normals.Average normals mean that for a given face, the normals of all points in that face point in the same direction
-	//CalculateAverageNormals(Indices, 12, Vertices, 32, 8, 5);
 
 	Mesh* Obj1 = new Mesh();
 	Obj1->CreateMesh(Vertices, Indices, 32, 12);
@@ -165,7 +170,6 @@ int main()
 
 	float Offset = 0.00f;
 	float Increment = 0.001f;
-
 	glm::mat4 model;
 	
 
@@ -198,6 +202,7 @@ int main()
 
 		//Render Mesh 1
 		model = glm::translate(model, glm::vec3(0.f, 2.0f, -2.0f));
+		model = glm::scale(model, glm::vec3(2.f, 2.f, 2.f));
 		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
