@@ -132,6 +132,7 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
     UniformCameraPosition = glGetUniformLocation(ShaderId, "CameraViewPosition");
     //Gets location ID for the number of point lights in the scene 
     UniformPointLightCount = glGetUniformLocation(ShaderId, "PointLightCount");
+    UniformSpotLightCount = glGetUniformLocation(ShaderId, "SpotLightCount");
    
 
    //Since PointLightUniformContainer is array we use for loop to fill in the values
@@ -139,27 +140,144 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
     {
         char LocationBuffer[100]={"/0"};
         //snprintf is used to store formatted string within char array
-        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLight[%d].LightData.LightColour", i);
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLights[%d].LightData.LightColour", i);
        // std::cout << LocationBuffer << std::endl;
         PointLightUniformContainer[i].UniformAmbientLightColour = glGetUniformLocation(ShaderId,LocationBuffer);
 
-        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLight[%d].LightData.AmbientIntensity", i);
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLights[%d].LightData.AmbientIntensity", i);
         PointLightUniformContainer[i].UniformAmbientLightIntensity = glGetUniformLocation(ShaderId,LocationBuffer);
 
-        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLight[%d].LightData.DiffuseIntensity", i);
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLights[%d].LightData.DiffuseIntensity", i);
         PointLightUniformContainer[i].UniformDiffuseIntensity = glGetUniformLocation(ShaderId,LocationBuffer);
 
-        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLight[%d].LightPosition", i);
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLights[%d].LightPosition", i);
         PointLightUniformContainer[i].UniformLightPosition = glGetUniformLocation(ShaderId,LocationBuffer);
 
-        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLight[%d].A", i);
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLights[%d].A", i);
         PointLightUniformContainer[i].UniformCoeffA= glGetUniformLocation(ShaderId, LocationBuffer);
-        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLight[%d].B", i);
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLights[%d].B", i);
         PointLightUniformContainer[i].UniformCoeffB = glGetUniformLocation(ShaderId,LocationBuffer);
-        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLight[%d].C", i);
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "pLights[%d].C", i);
         PointLightUniformContainer[i].UniformCoeffC = glGetUniformLocation(ShaderId, LocationBuffer);
     }
+
+    //Since SpotLightUniformContainer is array we use for loop to fill in the values
+    for (size_t i = 0; i < MAX_SPOT_LIGHTS; i++)
+    {
+        char LocationBuffer[100] = { "/0" };
+        //snprintf is used to store formatted string within char array
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].pLightData.LightData.LightColour", i);
+        SpotLightUniformContainer[i].UniformAmbientLightColour = glGetUniformLocation(ShaderId, LocationBuffer);
+
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].pLightData.LightData.AmbientIntensity", i);
+        SpotLightUniformContainer[i].UniformAmbientLightIntensity = glGetUniformLocation(ShaderId, LocationBuffer);
+
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].pLightData.LightData.DiffuseIntensity", i);
+        SpotLightUniformContainer[i].UniformDiffuseIntensity = glGetUniformLocation(ShaderId, LocationBuffer);
+
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].pLightData.LightPosition", i);
+        SpotLightUniformContainer[i].UniformLightPosition = glGetUniformLocation(ShaderId, LocationBuffer);
+
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].pLightData.A", i);
+        SpotLightUniformContainer[i].UniformCoeffA = glGetUniformLocation(ShaderId, LocationBuffer);
+
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].pLightData.B", i);
+        SpotLightUniformContainer[i].UniformCoeffB = glGetUniformLocation(ShaderId, LocationBuffer);
+
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].pLightData.C", i);
+        SpotLightUniformContainer[i].UniformCoeffC = glGetUniformLocation(ShaderId, LocationBuffer);
+
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].SpotLightDirection", i);
+        SpotLightUniformContainer[i].UniformSpotLightDirection = glGetUniformLocation(ShaderId, LocationBuffer);
+
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].Cutoff", i);
+        SpotLightUniformContainer[i].UniformCutoff = glGetUniformLocation(ShaderId, LocationBuffer);
+
+    }
 }
+
+//Enables shaders
+void Shader::EnableShader()
+{
+    glUseProgram(ShaderId);
+}
+
+//Unlinks the shaders
+void Shader::DisableShader() {
+    glUseProgram(0);
+}
+
+//Resets shader program and uniform variables
+void Shader::ClearShaders()
+{
+    if (ShaderId != 0)
+    {
+        ShaderId = 0;
+    }
+    UniformModel = 0;
+    UniformProjection = 0;
+}
+
+void Shader::SetDirectionalLight(DirectionalLight* TheLight)
+{
+    dLight = TheLight;
+}
+
+
+void Shader::EnableDirectionalLight()
+{
+    dLight->UseLight(DirectionalLightUniformContainer.UniformAmbientLightColour, DirectionalLightUniformContainer.UniformAmbientLightIntensity, DirectionalLightUniformContainer.UniformDiffuseDirection, DirectionalLightUniformContainer.UniformDiffuseIntensity);
+}
+
+
+void Shader::SetPointLight(PointLight* TheLight, GLuint NumberOfPointLights)
+{
+    if (NumberOfPointLights > MAX_POINT_LIGHTS) NumberOfPointLights = MAX_POINT_LIGHTS;
+    PointLightCount = NumberOfPointLights;
+    pLight = TheLight;
+}
+
+void Shader::EnablePointLight()
+{
+    glUniform1i(UniformPointLightCount, PointLightCount);
+    for (size_t i = 0; i < PointLightCount; i++)
+    {
+        //std::cout << uniformPLight[i].UniformAmbientLightColour <<" "<< uniformPLight[i].UniformAmbientLightIntensity<<std::endl;
+        pLight[i].UseLight(PointLightUniformContainer[i].UniformAmbientLightColour,
+            PointLightUniformContainer[i].UniformAmbientLightIntensity,
+            PointLightUniformContainer[i].UniformDiffuseIntensity, 
+            PointLightUniformContainer[i].UniformLightPosition,
+            PointLightUniformContainer[i].UniformCoeffA,
+            PointLightUniformContainer[i].UniformCoeffB,
+            PointLightUniformContainer[i].UniformCoeffC);
+    }
+}
+
+void Shader::SetSpotLight(SpotLight* TheLight, GLuint NumberOfSpotLights)
+{
+    if (NumberOfSpotLights > MAX_SPOT_LIGHTS) NumberOfSpotLights = MAX_SPOT_LIGHTS;
+    sLight = TheLight;
+    SpotLightCount = NumberOfSpotLights;
+}
+
+void Shader::EnableSpotLight()
+{
+    glUniform1i(UniformSpotLightCount, SpotLightCount);
+    for (size_t i = 0; i < SpotLightCount; i++)
+    {
+        sLight[i].UseLight(SpotLightUniformContainer[i].UniformAmbientLightColour,
+            SpotLightUniformContainer[i].UniformAmbientLightIntensity, 
+            SpotLightUniformContainer[i].UniformDiffuseIntensity,
+            SpotLightUniformContainer[i].UniformLightPosition,
+            SpotLightUniformContainer[i].UniformCoeffA,
+            SpotLightUniformContainer[i].UniformCoeffB,
+            SpotLightUniformContainer[i].UniformCoeffC,
+            SpotLightUniformContainer[i].UniformSpotLightDirection, 
+            SpotLightUniformContainer[i].UniformCutoff);
+    }
+}
+
+
 
 //Returns uniform model
 GLuint Shader::GetUniformModel()
@@ -213,54 +331,8 @@ GLuint Shader::GetUniformCameraPosition()
     return UniformCameraPosition;
 }
 
-void Shader::SetDirectionalLight(DirectionalLight* TheLight)
-{
-    dLight = TheLight;
-}
 
-void Shader::SetPointLight(PointLight* TheLight, GLuint NumberOfPointLights)
-{
-    if (NumberOfPointLights > MAX_POINT_LIGHTS) NumberOfPointLights = MAX_POINT_LIGHTS;
-    PointLightCount = NumberOfPointLights;
-    pLight = TheLight;
-}
 
-void Shader::EnablePointLight()
-{
-    glUniform1i(UniformPointLightCount, PointLightCount);
-    for (size_t i = 0; i < PointLightCount; i++)
-    {
-        //std::cout << uniformPLight[i].UniformAmbientLightColour <<" "<< uniformPLight[i].UniformAmbientLightIntensity<<std::endl;
-        pLight[i].UseLight(PointLightUniformContainer[i].UniformAmbientLightColour, PointLightUniformContainer[i].UniformAmbientLightIntensity, PointLightUniformContainer[i].UniformDiffuseIntensity, PointLightUniformContainer[i].UniformLightPosition, PointLightUniformContainer[i].UniformCoeffA, PointLightUniformContainer[i].UniformCoeffB, PointLightUniformContainer[i].UniformCoeffC);
-    }
-}
-
-void Shader::EnableDirectionalLight()
-{
-    dLight->UseLight(DirectionalLightUniformContainer.UniformAmbientLightColour, DirectionalLightUniformContainer.UniformAmbientLightIntensity, DirectionalLightUniformContainer.UniformDiffuseDirection, DirectionalLightUniformContainer.UniformDiffuseIntensity);
-}
-
-//Enables shaders
-void Shader::EnableShader()
-{
-    glUseProgram(ShaderId);
-}
-
-//Unlinks the shaders
-void Shader::DisableShader() {
-    glUseProgram(0);
-}
-
-//Resets shader program and uniform variables
-void Shader::ClearShaders()
-{
-    if (ShaderId != 0)
-    {
-        ShaderId = 0;
-    }
-    UniformModel = 0;
-    UniformProjection = 0;
-}
 
 //Destructor
 Shader::~Shader()

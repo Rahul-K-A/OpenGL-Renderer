@@ -5,6 +5,7 @@
 #include <fstream>
 #include "DirectionalLight.h"
 #include "PointLight.h"
+#include "SpotLight.h"
 #include "CommonValues.h"
 
 class Shader
@@ -37,6 +38,10 @@ public:
 	void SetPointLight(PointLight* TheLight, GLuint PointLightCount);
 	//Enables information contained within the point light(s) to be passed on to shader during runtime
 	void EnablePointLight();
+	//Attaches spot light to communicate with shader
+	void SetSpotLight(SpotLight* TheLight,GLuint NumberOfSpotLights);
+	//Enables information contained within the spot light(s) to be passed on to shader during runtime
+	void EnableSpotLight();
 
 	//Returns Uniform variable Model location ID
 	GLuint GetUniformModel();
@@ -78,7 +83,20 @@ private:
 	GLuint UniformCameraPosition;
 	//Number of point lights uniform location ID
 	GLuint UniformPointLightCount;
+	//Number of spot lights uniform location ID
+	GLuint UniformSpotLightCount;
+
 	
+	struct DirectionalLightUniformVars {
+		GLuint UniformAmbientLightColour;
+		GLuint UniformAmbientLightIntensity;
+		GLuint UniformDiffuseDirection;
+		GLuint UniformDiffuseIntensity;
+	} DirectionalLightUniformContainer;
+
+	//Pointer to directional light
+	DirectionalLight* dLight;
+
 	//Structure which stores all uniform location IDs needed for a point light
 	struct PointLightUniformVars{
 		GLuint UniformAmbientLightColour;
@@ -95,15 +113,27 @@ private:
 	GLuint PointLightCount;
 	//Pointer to array of point lights to be rendered
 	PointLight *pLight;
-	struct DirectionalLightUniformVars{
+
+	struct SpotLightUniformVars {
 		GLuint UniformAmbientLightColour;
 		GLuint UniformAmbientLightIntensity;
-		GLuint UniformDiffuseDirection;
-        GLuint UniformDiffuseIntensity;
-	} DirectionalLightUniformContainer;
+		GLuint UniformDiffuseIntensity;
+		GLuint UniformCoeffA;
+		GLuint UniformCoeffB;
+		GLuint UniformCoeffC;
+		GLuint UniformLightPosition;
+		GLuint UniformSpotLightDirection;
+		GLuint UniformCutoff;
 
-	//Pointer to directional light
-	DirectionalLight * dLight;
+	}SpotLightUniformContainer[MAX_SPOT_LIGHTS];
+	//Spot light array  ptr;
+	SpotLight* sLight;
+	//Spot Light array count
+	GLuint SpotLightCount;
+
+
+
+	
 
 	//Adds the shader to the program
 	GLuint AddShader(GLuint TheProgram, const char* ShaderCode, GLenum ShaderType);

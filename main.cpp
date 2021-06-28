@@ -13,6 +13,7 @@
 #include <vector>
 #include "Texture.h"
 #include "DirectionalLight.h"
+#include "SpotLight.h"
 #include "Material.h"
 
 //Window object
@@ -37,10 +38,20 @@ std::vector<Shader*> ShaderPointers;
 
 //PointLights
 PointLight PLightArr[MAX_POINT_LIGHTS] = {
- PointLight(glm::vec4(1.f, 0.f, 0.f, .2f),  1.f , glm::vec3(0.f,0.0f, 0.0f) , glm::vec3(0.3f, 0.2f, 0.1f)),
- PointLight(glm::vec4(0.f, 1.f, 0.f, .2f), 1.f, glm::vec3(-4.f, .0f, 0.f), glm::vec3(0.3f, 0.2f, 0.1f)),
- PointLight(glm::vec4(0.f, 0.f, 1.f, .2f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
+ PointLight(glm::vec4(1.f, 0.f, 0.f, .1f),  1.f , glm::vec3(0.f,0.0f, 0.0f) , glm::vec3(0.3f, 0.2f, 0.1f)),
+ PointLight(glm::vec4(0.f, 1.f, 0.f, .1f), 1.f, glm::vec3(-4.f, .0f, 0.f), glm::vec3(0.3f, 0.2f, 0.1f)),
+ PointLight(glm::vec4(0.f, 0.f, 1.f, .1f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
 };
+
+
+//SpotLights
+SpotLight SLightArr[2] = {
+ SpotLight( glm::vec4(1.f, 1.f, 1.f, .0f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 10.f),
+ SpotLight( glm::vec4(1.f, 1.f, 1.f, .0f),  2.f , glm::vec3(0.f,-1.5f,0.f)  , glm::vec3(0.5f, 0.0f, 0.f) , glm::vec3(-100,-1,0), 20.f),
+ //SpotLight(glm::vec4(0.f, 0.f, 1.f, .2f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
+};
+
+
 
 
 //Uniform Variable tags
@@ -84,10 +95,10 @@ void CreateObjects()
 		//Had a bug where normals were inverted so adopted this order
 		//Might have to reconsider when adding ASSIMP
 
-		1, 3, 0,
-		2, 3, 1,
-		0, 3, 2,
-		2, 1, 0
+		0, 3, 1,
+		1, 3, 2,
+		2, 3, 0,
+		0, 1, 2
 	};
 
 	//x,y,z are the vertices of the mesh, u and v are texture wrapping params. nx,ny,nz are normals to the mesh used for lighting
@@ -103,8 +114,8 @@ void CreateObjects()
 
 	//The next shape is a plane which represents a floor
 	unsigned int floorIndices[] = {
-		0, 2, 1,
-		1, 2, 3
+		1, 2, 0,
+		3, 2, 1
 	};
 
 	GLfloat floorVertices[] = {
@@ -163,13 +174,14 @@ int main()
 	//Set texture paths
 	BrickTexture.setPath((char*)("Textures/brick.png"));
 	BrickTexture.LoadTexture();
-	//DirtTexture.setPath((char*)("Textures/dirt.png"));
-	//DirtTexture.LoadTexture();
-	PlainTexture.setPath((char*)("Textures/plain.png"));
-	PlainTexture.LoadTexture();
+	DirtTexture.setPath((char*)("Textures/dirt.png"));
+	DirtTexture.LoadTexture();
+	//PlainTexture.setPath((char*)("Textures/plain.png"));
+	//PlainTexture.LoadTexture();
 
 	ShaderPointers[0]->SetDirectionalLight(&DLight);
-	ShaderPointers[0]->SetPointLight(PLightArr, MAX_POINT_LIGHTS);
+	ShaderPointers[0]->SetPointLight(PLightArr, 1);
+	ShaderPointers[0]->SetSpotLight(SLightArr,2);
 
 	float Offset = 0.00f;
 	float Increment = 0.001f;
@@ -198,9 +210,12 @@ int main()
 		//Enable shader
 		ShaderPointers[0]->EnableShader();
 		//Enable light
-		//DLight.UseLight(UniformAmbientCol, UniformAmbientIntensity,UniformDiffuseDir, UniformDiffuseIntensity);
 		ShaderPointers[0]->EnableDirectionalLight();
 		ShaderPointers[0]->EnablePointLight();
+		glm::vec3 LowerY = Cam.GetCameraPosition();
+		LowerY.y -= 0.1f;
+		SLightArr[1].SetLocationAndDirection(LowerY, Cam.GetCameraDirection());
+		ShaderPointers[0]->EnableSpotLight();
 		
 		
 
@@ -232,7 +247,7 @@ int main()
 		glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
 		ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
-		PlainTexture.UseTexture();
+		DirtTexture.UseTexture();
 		
 		
 		

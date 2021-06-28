@@ -20,6 +20,8 @@ public:
 	glm::mat4 CalculateCameraMatrix();
 	//Returns position of camera in world space
 	glm::vec3 GetCameraPosition();
+	//Returns direction camera is facing
+	glm::vec3 GetCameraDirection();
 
 private:
 	//Postion vector
