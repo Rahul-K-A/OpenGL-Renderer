@@ -46,8 +46,8 @@ PointLight PLightArr[MAX_POINT_LIGHTS] = {
 
 //SpotLights
 SpotLight SLightArr[2] = {
- SpotLight( glm::vec4(1.f, 1.f, 1.f, .0f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 10.f),
- SpotLight( glm::vec4(1.f, 1.f, 1.f, .0f),  2.f , glm::vec3(0.f,-1.5f,0.f)  , glm::vec3(0.5f, 0.0f, 0.f) , glm::vec3(-100,-1,0), 20.f),
+ SpotLight( glm::vec4(1.f, 1.f, 1.f, .0f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 20.f),
+ SpotLight(glm::vec4(1.f, 1.f, 1.f, .0f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 20.f),
  //SpotLight(glm::vec4(0.f, 0.f, 1.f, .2f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
 };
 
@@ -210,8 +210,8 @@ int main()
 		//Enable shader
 		ShaderPointers[0]->EnableShader();
 		//Enable light
-		ShaderPointers[0]->EnableDirectionalLight();
-		ShaderPointers[0]->EnablePointLight();
+		//ShaderPointers[0]->EnableDirectionalLight();
+		//ShaderPointers[0]->EnablePointLight();
 		glm::vec3 LowerY = Cam.GetCameraPosition();
 		LowerY.y -= 0.1f;
 		SLightArr[1].SetLocationAndDirection(LowerY, Cam.GetCameraDirection());

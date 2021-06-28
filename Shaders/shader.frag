@@ -155,13 +155,16 @@
 
   vec4 CalculateSpotLight(SpotLight sLight)
   {
-    vec4  SpotLightColour;
-    vec3 RayDirection=normalize(FragmentPosition-sLight.pLightData.LightPosition);
+    vec4  SpotLightColour=vec4(0,0,0,0);
+    vec3 RayDirection=FragmentPosition-sLight.pLightData.LightPosition;
+    RayDirection=normalize(RayDirection);
     float SpotLightFactor=dot(RayDirection,sLight.SpotLightDirection);
     if(SpotLightFactor>sLight.Cutoff)
     {
         SpotLightColour=CalculatePointLight(sLight.pLightData);
-        SpotLightColour * (1.0f - (1.0f - SpotLightFactor)*( 1.0f / (1.0f - sLight.Cutoff) ) );
+       SpotLightColour.x=  SpotLightColour.x * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+       SpotLightColour.y = SpotLightColour.y * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+       SpotLightColour.z= SpotLightColour.z * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
     }
     return SpotLightColour;
   }
