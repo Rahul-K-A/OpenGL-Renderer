@@ -13,8 +13,10 @@ public:
 	Texture(char* Path);
 	//Destructor
 	~Texture();
-
-	void LoadTexture();
+	//Loads RBG texture
+	bool LoadTexture();
+	//Loads RGBA texture
+	bool LoadTextureWithAlpha();
 	void UseTexture();
 	void ClearTexture();
 	void setPath(char* Path);

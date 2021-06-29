@@ -10,7 +10,7 @@ Mesh::Mesh()
 //Creates Mesh from indices and vertices
 void Mesh::CreateMesh(GLfloat* Vertices, unsigned int* Indices, unsigned int NumberOfVertices, unsigned int NumberOfIndices)
 {
-	CalculateAverageNormals(Indices, NumberOfIndices, Vertices, NumberOfVertices, 8, 5);
+	//CalculateAverageNormals(Indices, NumberOfIndices, Vertices, NumberOfVertices, 8, 5);
 	IndexCount = NumberOfIndices;
 	glGenVertexArrays(1, &Vao);
 	//Links Vao to OpenGL state machine as the vertex array object
@@ -69,7 +69,7 @@ void Mesh::RenderMesh() {
 	//Explicitly binding Ibo because some GPU have bug which require you to explicitly bind Ibo to Vao
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Ibo);
 	//Params 1)How to consider vertices as,2) Number of elements to be rendered,3)Data type of index (byte-wise or int-wise) 4)Address of indices.0 because indices were already bound in CreateTr
-	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, 0);
 	//Unbind Ibo and Vao to prevent accidental data modification
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -95,59 +95,59 @@ void Mesh::RemoveMesh()
 	}
 }
 
-void Mesh::CalculateAverageNormals(unsigned int* Indices, unsigned int IndiceCount, GLfloat* Vertices, unsigned int VerticeCount, unsigned int vLength, unsigned int normalOffset)
-{
-	//For every face, we calculate the normal and add it to the nx,ny,nz of Vertices[]
-   //We then normalize nx,ny,nz to get average normal
-
-	unsigned int in0;
-	unsigned int in1;
-	unsigned int in2;
-	for (size_t i = 0; i < IndiceCount; i += 3)
-	{
-		//vLength is the number of elements between the start of one vertex and the start of its subsequent vertex
-		//In our case, it is 8
-		in0 = Indices[i + 0] * vLength;
-		in1 = Indices[i + 1] * vLength;
-		in2 = Indices[i + 2] * vLength;
-
-		glm::vec3 v1(Vertices[in1] - Vertices[in0], Vertices[in1 + 1] - Vertices[in0 + 1], Vertices[in1 + 2] - Vertices[in0 + 2]);
-
-		glm::vec3 v2(Vertices[in2] - Vertices[in0], Vertices[in2 + 1] - Vertices[in0 + 1], Vertices[in2 + 2] - Vertices[in0 + 2]);
-
-		glm::vec3 Normalvec = glm::cross(v1, v2);
-
-		Normalvec = glm::normalize(Normalvec);
-
-		in0 += normalOffset;
-		in1 += normalOffset;
-		in2 += normalOffset;
-
-		Vertices[in0] += Normalvec.x;
-		Vertices[in0 + 1] += Normalvec.y;
-		Vertices[in0 + 2] += Normalvec.z;
-
-		Vertices[in1] += Normalvec.x;
-		Vertices[in1 + 1] += Normalvec.y;
-		Vertices[in1 + 2] += Normalvec.z;
-
-		Vertices[in2] += Normalvec.x;
-		Vertices[in2 + 1] += Normalvec.y;
-		Vertices[in2 + 2] += Normalvec.z;
-	}
-
-	for (size_t i = 0; i < VerticeCount / vLength; i++)
-	{
-		unsigned int nOffset = i * vLength + normalOffset;
-		glm::vec3 vec(Vertices[nOffset], Vertices[nOffset + 1], Vertices[nOffset + 2]);
-
-		vec = glm::normalize(vec);
-
-		Vertices[nOffset] = vec.x;
-		Vertices[nOffset + 1] = vec.y;
-		Vertices[nOffset + 2] = vec.z;
-	}
-}
+//void Mesh::CalculateAverageNormals(unsigned int* Indices, unsigned int IndiceCount, GLfloat* Vertices, unsigned int VerticeCount, unsigned int vLength, unsigned int normalOffset)
+//{
+//	//For every face, we calculate the normal and add it to the nx,ny,nz of Vertices[]
+//   //We then normalize nx,ny,nz to get average normal
+//
+//	unsigned int in0;
+//	unsigned int in1;
+//	unsigned int in2;
+//	for (size_t i = 0; i < IndiceCount; i += 3)
+//	{
+//		//vLength is the number of elements between the start of one vertex and the start of its subsequent vertex
+//		//In our case, it is 8
+//		in0 = Indices[i + 0] * vLength;
+//		in1 = Indices[i + 1] * vLength;
+//		in2 = Indices[i + 2] * vLength;
+//
+//		glm::vec3 v1(Vertices[in1] - Vertices[in0], Vertices[in1 + 1] - Vertices[in0 + 1], Vertices[in1 + 2] - Vertices[in0 + 2]);
+//
+//		glm::vec3 v2(Vertices[in2] - Vertices[in0], Vertices[in2 + 1] - Vertices[in0 + 1], Vertices[in2 + 2] - Vertices[in0 + 2]);
+//
+//		glm::vec3 Normalvec = glm::cross(v1, v2);
+//
+//		Normalvec = glm::normalize(Normalvec);
+//
+//		in0 += normalOffset;
+//		in1 += normalOffset;
+//		in2 += normalOffset;
+//
+//		Vertices[in0] += Normalvec.x;
+//		Vertices[in0 + 1] += Normalvec.y;
+//		Vertices[in0 + 2] += Normalvec.z;
+//
+//		Vertices[in1] += Normalvec.x;
+//		Vertices[in1 + 1] += Normalvec.y;
+//		Vertices[in1 + 2] += Normalvec.z;
+//
+//		Vertices[in2] += Normalvec.x;
+//		Vertices[in2 + 1] += Normalvec.y;
+//		Vertices[in2 + 2] += Normalvec.z;
+//	}
+//
+//	for (size_t i = 0; i < VerticeCount / vLength; i++)
+//	{
+//		unsigned int nOffset = i * vLength + normalOffset;
+//		glm::vec3 vec(Vertices[nOffset], Vertices[nOffset + 1], Vertices[nOffset + 2]);
+//
+//		vec = glm::normalize(vec);
+//
+//		Vertices[nOffset] = vec.x;
+//		Vertices[nOffset + 1] = vec.y;
+//		Vertices[nOffset + 2] = vec.z;
+//	}
+//}
 
 //Destructor
 Mesh::~Mesh()

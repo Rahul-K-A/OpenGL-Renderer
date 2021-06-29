@@ -15,6 +15,8 @@
 #include "DirectionalLight.h"
 #include "SpotLight.h"
 #include "Material.h"
+#include "Model.h"
+#include <assimp/Importer.hpp>
 
 //Window object
 MyWindow Window(1024,576);
@@ -23,7 +25,7 @@ MyWindow Window(1024,576);
 Camera Cam(glm::vec3(0.0f, 1.0f, 5.f), -90.0f, 0.0f, 4.0f, 40.0f);
 
 //Light
-DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 float Intensity;
 
 //Material
@@ -35,24 +37,31 @@ Material DullMaterial(10.f, 4);
 std::vector<Mesh*> MeshPointers;
 std::vector<Shader*> ShaderPointers;
 
+//Model F1 Car
+Model Car=Model();
+//Model path
+
+
+
 
 //PointLights
 PointLight PLightArr[MAX_POINT_LIGHTS] = {
- PointLight(glm::vec4(1.f, 0.f, 0.f, .1f),  1.f , glm::vec3(0.f,0.0f, 0.0f) , glm::vec3(0.3f, 0.2f, 0.1f)),
- PointLight(glm::vec4(0.f, 1.f, 0.f, .1f), 1.f, glm::vec3(-4.f, .0f, 0.f), glm::vec3(0.3f, 0.2f, 0.1f)),
- PointLight(glm::vec4(0.f, 0.f, 1.f, .1f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
+ PointLight(glm::vec4(1.f, 0.f, 0.f, 1.f),  1.f , glm::vec3(0.f,0.0f, 0.0f) , glm::vec3(0.3f, 0.2f, 0.1f)),
+ PointLight(glm::vec4(0.f, 1.f, 0.f, 1.f), 1.f, glm::vec3(-4.f, 0.0f, 0.f), glm::vec3(0.3f, 0.2f, 0.1f)),
+ PointLight(glm::vec4(0.f, 0.f, 1.f, 1.f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
 };
 
 
 //SpotLights
 SpotLight SLightArr[2] = {
  SpotLight( glm::vec4(1.f, 1.f, 1.f, .0f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 20.f),
- SpotLight(glm::vec4(1.f, 1.f, 1.f, .0f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 20.f),
+ SpotLight(glm::vec4(1.f, 1.f, 1.f, 10.f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 20.f),
  //SpotLight(glm::vec4(0.f, 0.f, 1.f, .2f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
 };
 
 
-
+//Assimp importer
+Assimp::Importer AImporter = Assimp::Importer();
 
 //Uniform Variable tags
 GLuint UniformModel;
@@ -83,6 +92,8 @@ static const char* vShader = "Shaders/shader.vert";
 
 //Fragment shader
 static const char* fShader = "Shaders/shader.frag";
+
+
 
 //Function which creates mesh
 void CreateObjects()
@@ -119,10 +130,10 @@ void CreateObjects()
 	};
 
 	GLfloat floorVertices[] = {
-		-10.0f, 0.0f, -10.0f,	0.0f, 0.0f,		0.0f, 0.0f, 0.0f,
-		10.0f, 0.0f, -10.0f,	10.0f, 0.0f,	0.0f, 0.0f, 0.0f,
-		-10.0f, 0.0f, 10.0f,	0.0f, 10.0f,	0.0f, 0.0f, 0.0f,
-		10.0f, 0.0f, 10.0f,		10.0f, 10.0f,	0.0f, 0.0f, 0.0f
+		-10.0f, 0.0f, -10.0f,	0.0f, 0.0f,		0.0f, -1.0f, 0.0f,
+		10.0f, 0.0f, -10.0f,	10.0f, 0.0f,	0.0f, -1.0f, 0.0f,
+		-10.0f, 0.0f, 10.0f,	0.0f, 10.0f,	0.0f, -1.0f, 0.0f,
+		10.0f, 0.0f, 10.0f,		10.0f, 10.0f,	0.0f, -1.0f, 0.0f
 	};
 
 	Mesh* Obj = new Mesh();
@@ -131,6 +142,7 @@ void CreateObjects()
     Obj = new Mesh();
 	Obj->CreateMesh(floorVertices, floorIndices, 32, 6);
 	MeshPointers.push_back(Obj);
+	Car.LoadModel(std::string("Models/f1mesh.obj"));
 }
 
 //Function which creates shader
@@ -173,19 +185,17 @@ int main()
 
 	//Set texture paths
 	BrickTexture.setPath((char*)("Textures/brick.png"));
-	BrickTexture.LoadTexture();
+	BrickTexture.LoadTextureWithAlpha();
 	DirtTexture.setPath((char*)("Textures/dirt.png"));
-	DirtTexture.LoadTexture();
-	//PlainTexture.setPath((char*)("Textures/plain.png"));
-	//PlainTexture.LoadTexture();
-
+	DirtTexture.LoadTextureWithAlpha();
+	
 	ShaderPointers[0]->SetDirectionalLight(&DLight);
-	ShaderPointers[0]->SetPointLight(PLightArr, 1);
+	ShaderPointers[0]->SetPointLight(PLightArr, MAX_POINT_LIGHTS);
 	ShaderPointers[0]->SetSpotLight(SLightArr,2);
 
 	float Offset = 0.00f;
 	float Increment = 0.001f;
-	glm::mat4 model;
+	glm::mat4 modelmatrix;
 	
 
 	while (Window.IsOpen())
@@ -194,7 +204,7 @@ int main()
 		DeltaTime = now - LastTime;
 		LastTime = now;
 		//Creating identity matrix to store the transforms
-		model = glm::mat4(1.0f);
+		modelmatrix = glm::mat4(1.0f);
 
 		//Handles keyboard and mouse events
 		Window.PollWindowEvents();
@@ -211,7 +221,7 @@ int main()
 		ShaderPointers[0]->EnableShader();
 		//Enable light
 		//ShaderPointers[0]->EnableDirectionalLight();
-		//ShaderPointers[0]->EnablePointLight();
+		ShaderPointers[0]->EnablePointLight();
 		glm::vec3 LowerY = Cam.GetCameraPosition();
 		LowerY.y -= 0.1f;
 		SLightArr[1].SetLocationAndDirection(LowerY, Cam.GetCameraDirection());
@@ -220,30 +230,24 @@ int main()
 		
 
 		//Render Mesh 1
-		model = glm::translate(model, glm::vec3(0.f, 2.0f, -2.0f));
-		model = glm::scale(model, glm::vec3(2.f, 2.f, 2.f));
-		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		modelmatrix = glm::translate(modelmatrix, glm::vec3(-2.f, 0.f, 0.0f));
+		modelmatrix = glm::scale(modelmatrix, glm::vec3(.01f, .01f, .01f));
+		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(modelmatrix));
 		glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
 		glm::vec3 CameraPosition = Cam.GetCameraPosition();
 		glUniform3f(UniformCameraPosition, CameraPosition.x, CameraPosition.y, CameraPosition.z);
-
+		ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
+		Car.RenderModel();
 		//Offset += Increment;
-		if (abs(Offset) > 5.f)
-		{
-			Increment *= -1;
-		}
-		BrickTexture.UseTexture();
-		DullMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
-		MeshPointers[0]->RenderMesh();
 
 		//Reset transform matrix
-		model = glm::mat4(1.0f);
+		modelmatrix = glm::mat4(1.0f);
 
 
-		//Render mesh :
-		model = glm::translate(model, glm::vec3(0, -2.0f, 0.0f));
-		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		//Render mesh 2:
+		modelmatrix = glm::translate(modelmatrix, glm::vec3(0, -2.0f, 0.0f));
+		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(modelmatrix));
 		glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
 		ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);

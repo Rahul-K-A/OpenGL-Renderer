@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glm\gtc\matrix_transform.hpp>
 
+
 class Camera
 {
 public:
@@ -22,6 +23,8 @@ public:
 	glm::vec3 GetCameraPosition();
 	//Returns direction camera is facing
 	glm::vec3 GetCameraDirection();
+	//Returns boolean for spotlight attached to camera
+	bool GetFlashLightStatus();
 
 private:
 	//Postion vector
@@ -42,4 +45,8 @@ private:
 	GLdouble MovementSpeed;
 	//Turn speed rate
 	GLdouble TurnSpeed;
+	//Spot Light Status boolean
+	bool IsSpotLightOn;
+
+
 };

@@ -20,5 +20,5 @@ private:
 	//Index count which stores number of indices
 	GLsizei IndexCount;
 	//Calculates average normals.Finding average normals ensures that for a given face, the normals of all points in that face point in the same direction.Used during lighting
-	void CalculateAverageNormals(unsigned int* Indices, unsigned int IndiceCount, GLfloat* Vertices, unsigned int VerticeCount, unsigned int vLength, unsigned int normalOffset);
+	//void CalculateAverageNormals(unsigned int* Indices, unsigned int IndiceCount, GLfloat* Vertices, unsigned int VerticeCount, unsigned int vLength, unsigned int normalOffset);
 };

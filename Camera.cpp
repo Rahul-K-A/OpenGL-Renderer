@@ -3,7 +3,7 @@
 //Constructor
 Camera::Camera(glm::vec3 InitialPosition, GLfloat InitialYaw, GLfloat InitialPitch, GLfloat InitialMovementSpeed, GLfloat InitialTurnSpeed)
 //Initialzer list
-	:Position{ InitialPosition }, Front{ glm::vec3(0.f,0.f,-1.f) }, Yaw{ InitialYaw }, Pitch{ InitialPitch }, MovementSpeed{ InitialMovementSpeed }, TurnSpeed{ InitialTurnSpeed }
+	:Position{ InitialPosition }, Front{ glm::vec3(0.f,0.f,-1.f) }, Yaw{ InitialYaw }, Pitch{ InitialPitch }, MovementSpeed{ InitialMovementSpeed }, TurnSpeed{ InitialTurnSpeed }, IsSpotLightOn{false}
 {
 	Update();
 }
@@ -48,6 +48,11 @@ void Camera::KeyControl(bool* KeyArray, double DeltaTime)
 	{
 		Position = Position - (WorldUp * Velocity);
 	}
+
+	if (KeyArray[GLFW_KEY_F])
+	{
+		IsSpotLightOn = !IsSpotLightOn;
+	}
 }
 
 //Handles mouse input
@@ -89,6 +94,11 @@ glm::vec3 Camera::GetCameraPosition()
 glm::vec3 Camera::GetCameraDirection()
 {
 	return Front;
+}
+
+bool Camera::GetFlashLightStatus()
+{
+	return IsSpotLightOn;
 }
 
 void Camera::Update()

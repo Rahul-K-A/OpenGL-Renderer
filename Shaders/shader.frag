@@ -162,9 +162,12 @@
     if(SpotLightFactor>sLight.Cutoff)
     {
         SpotLightColour=CalculatePointLight(sLight.pLightData);
-       SpotLightColour.x=  SpotLightColour.x * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
-       SpotLightColour.y = SpotLightColour.y * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
-       SpotLightColour.z= SpotLightColour.z * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+        //Gets smooth edges around spot light
+        SpotLightColour.x =  SpotLightColour.x * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+        SpotLightColour.y =  SpotLightColour.y * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+        SpotLightColour.z =  SpotLightColour.z * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+        SpotLightColour.w =  SpotLightColour.w * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+
     }
     return SpotLightColour;
   }
