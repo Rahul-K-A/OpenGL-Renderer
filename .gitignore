@@ -5,3 +5,5 @@ ImplementingCamera.vcxproj.filters
 ImplementingCamera.vcxproj.user
 Debug/
 .vs/
+Models/
+Textures/
