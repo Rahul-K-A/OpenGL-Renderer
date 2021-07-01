@@ -8,7 +8,7 @@ SpotLight::SpotLight()
 }
 
 SpotLight::SpotLight(glm::vec4 AmbientLightParams, GLfloat DiffuseIntensity, glm::vec3 LightPositionParams, glm::vec3 EquationCoeffs, glm::vec3 DirectionParams, GLfloat EdgeValue)
-	:PointLight(AmbientLightParams, DiffuseIntensity, LightPositionParams, EquationCoeffs), SpotLightDirection{ DirectionParams }, Cutoff{ EdgeValue }
+	:PointLight(AmbientLightParams, DiffuseIntensity, 1024,1024,LightPositionParams, EquationCoeffs), SpotLightDirection{ DirectionParams }, Cutoff{ EdgeValue },IsLightOn{true}
 {
 	ProcessedCutoff = cosf(glm::radians(Cutoff));
 	SpotLightDirection = glm::normalize(SpotLightDirection);

@@ -7,6 +7,7 @@
 #include "PointLight.h"
 #include "SpotLight.h"
 #include "CommonValues.h"
+#include <glm/gtc/type_ptr.hpp>
 
 class Shader
 {
@@ -43,6 +44,10 @@ public:
 	//Enables information contained within the spot light(s) to be passed on to shader during runtime
 	void EnableSpotLight();
 
+
+	void AttachTexture(GLuint TextureUnit);
+	void AttachShadowMap(GLuint TextureUnit);
+
 	//Returns Uniform variable Model location ID
 	GLuint GetUniformModel();
 	//Returns uniform variable projection location ID
@@ -63,7 +68,9 @@ public:
 	GLuint GetUniformSpecularShininess();
 	//Returns uniform variable camera view ID
 	GLuint GetUniformCameraPosition();
-	
+	void SetTexture(GLuint TextureUnit);
+	void SetDirectionalShadowMap(GLuint TextureUnit);
+	void SetDirectionalLightTransform(glm::mat4 DirectionalLightTransform);
 	
 
 private:
@@ -85,6 +92,12 @@ private:
 	GLuint UniformPointLightCount;
 	//Number of spot lights uniform location ID
 	GLuint UniformSpotLightCount;
+	//Texture sampler location ID
+	GLuint UniformTex2DSampler;
+	//Shadow amp sampler location ID
+	GLuint UniformShadowMap;
+	//UniformLightSpaceTransform
+	GLuint UniformDirectionalLightSpaceTransform;
 
 	
 	struct DirectionalLightUniformVars {
@@ -139,4 +152,6 @@ private:
 	GLuint AddShader(GLuint TheProgram, const char* ShaderCode, GLenum ShaderType);
 	//Compiles the shader
 	void CompileShaders(const char* vShaderCode, const char* fShaderCode);
+
+	void GetAllUniforms();
 };

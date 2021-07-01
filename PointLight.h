@@ -5,7 +5,7 @@ class PointLight :public Light
 public:
 	//Constructor
 	PointLight();
-	PointLight(glm::vec4 AmbientLightParams, GLfloat DiffuseIntensity, glm::vec3 LightPositionParams, glm::vec3 EquationCoeffs);
+	PointLight(glm::vec4 AmbientLightParams, GLfloat DiffuseIntensity, GLuint SMapWidth, GLuint SMapHeight, glm::vec3 LightPositionParams, glm::vec3 EquationCoeffs);
 
 	//Enables light during rendering and passes lighting information to shaders
 	void UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocation, GLuint DiffuseIntensityUniformLocation, GLuint LightPositionUniformLocation, GLuint CoeffAUniformLocation, GLuint CoeffBUniformLocation, GLuint CoeffCUniformLocation);;

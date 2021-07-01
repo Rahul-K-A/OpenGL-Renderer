@@ -3,6 +3,7 @@
   in vec2 TextureData;
   in vec3 Normal;
   in vec3 FragmentPosition;
+  in vec4  DirectionalLightSpacePosition;
   //Output data
   out vec4 colour;
 
@@ -65,6 +66,9 @@
   //Texture sampler
   uniform sampler2D theTexture;
 
+  //Texture sampler
+  uniform sampler2D DirectionalShadowMap;
+
   //Material
   uniform Material material;
 
@@ -73,8 +77,44 @@
 
   
 
+  float CalculateShadowFactor()
+  {
+    //Convert to normalised device coords
+    vec3 ProjectionCoords=DirectionalLightSpacePosition.xyz/DirectionalLightSpacePosition.w;
+    float ClosestDepth;
+    //Converts all values within to 0 to 1 which is device coords
+    ProjectionCoords=(ProjectionCoords*0.5)+vec3(0.5,0.5,0.5);
+    //Gets depth value to light (remember that shadow map is technically depth map)
+    //Basically tells us whether shadow is left or right to camera position
+    ClosestDepth= texture(DirectionalShadowMap,ProjectionCoords.xy).r;
+    //Tells us how far away camera is to the shadow
+    float CurrentDepth=ProjectionCoords.z;
+    float shadow=0.f;
+    vec3 normal = normalize(Normal);
+	vec3 lightDir = normalize(dLight.Direction);
+	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.0005);
+	vec2 texelSize = 1.0 / textureSize(DirectionalShadowMap, 0);
+	for(int x = -1; x <= 1; ++x)
+	{
+		for(int y = -1; y <= 1; ++y)
+		{
+			float pcfDepth = texture(DirectionalShadowMap, ProjectionCoords.xy + vec2(x,y) * texelSize).r;
+			shadow += (CurrentDepth - bias) > pcfDepth ? 1.0 : 0.0;
+		}
+	}
+
+	shadow /= 9.0;
+	
+	if(ProjectionCoords.z > 1.0)
+	{
+		shadow = 0.0;
+	}									
+
+    return shadow;
+  }
+
   //Calculates light from a given direction
-   vec4 CalculateLightByDirection(Light Light,vec3 Direction)
+   vec4 CalculateLightByDirection(Light Light,vec3 Direction,float ShadowFactor)
   {
    //Calculates ambient lighting
     vec4 AmbientLight= vec4(Light.LightColour,1.0f)*Light.AmbientIntensity;
@@ -105,13 +145,21 @@
             }
       }
       //Returns overall lighting
-     return (AmbientLight+DiffuseLight+SpecularLight);
+      vec4 temp=DiffuseLight+SpecularLight;
+      temp.x=temp.x*(1.f-ShadowFactor);
+      temp.y=temp.y*(1.f-ShadowFactor);
+      temp.z=temp.z*(1.f-ShadowFactor);
+      temp.w=temp.w*(1.f-ShadowFactor);
+    
+
+     return (AmbientLight +temp);
   }
 
 
   //Caclulates lighting for a given directional light
   vec4 CalculateDirectionalLight(){
-     return CalculateLightByDirection(dLight.LightData,dLight.Direction);
+     float ShadowFactor=CalculateShadowFactor();
+     return CalculateLightByDirection(dLight.LightData,dLight.Direction,ShadowFactor);
   }
 
   //Calculates lighting for a singular point Light
@@ -126,7 +174,7 @@
         LightToFragmentDirection=normalize(LightToFragmentDirection);
         //While taking the distance from the face to the light as opposed to taking it from the light to the face seems unintuitive, the negative in our reflection function
         //will work properly now and give reflection
-         vec4 pLightColour=CalculateLightByDirection(pLight.LightData,LightToFragmentDirection);
+         vec4 pLightColour=CalculateLightByDirection(pLight.LightData,LightToFragmentDirection,0.0f);
         //Calculates attenuation
         float Attenuation= pLight.A*Distance*Distance + pLight.B*Distance + pLight.C;
         //Divide by Attenuation factor to simulate light falloff

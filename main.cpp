@@ -25,7 +25,7 @@ MyWindow Window(1024,576);
 Camera Cam(glm::vec3(0.0f, 1.0f, 5.f), -90.0f, 0.0f, 4.0f, 40.0f);
 
 //Light
-DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, .1f), glm::vec4(0.0f, -15.f, -10.0f, 0.3f),2048,2048);
 float Intensity;
 
 //Material
@@ -36,6 +36,7 @@ Material DullMaterial(10.f, 4);
 //Vectors containing Mesh pointer and shader pointer
 std::vector<Mesh*> MeshPointers;
 std::vector<Shader*> ShaderPointers;
+Shader DirectionalShadowShader;
 
 //Model F1 Car
 Model Car=Model();
@@ -46,9 +47,9 @@ Model Car=Model();
 
 //PointLights
 PointLight PLightArr[MAX_POINT_LIGHTS] = {
- PointLight(glm::vec4(1.f, 0.f, 0.f, 1.f),  1.f , glm::vec3(0.f,0.0f, 0.0f) , glm::vec3(0.3f, 0.2f, 0.1f)),
- PointLight(glm::vec4(0.f, 1.f, 0.f, 1.f), 1.f, glm::vec3(-4.f, 0.0f, 0.f), glm::vec3(0.3f, 0.2f, 0.1f)),
- PointLight(glm::vec4(0.f, 0.f, 1.f, 1.f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
+ PointLight(glm::vec4(1.f, 0.f, 0.f, .5f),  1.f ,1024,1024, glm::vec3(0.f,0.0f, 0.0f) , glm::vec3(0.3f, 0.2f, 0.1f)),
+ PointLight(glm::vec4(0.f, 1.f, 0.f, .5f), 1.f, 1024,1024, glm::vec3(-4.f, 0.0f, 0.f), glm::vec3(0.3f, 0.2f, 0.1f)),
+ PointLight(glm::vec4(0.f, 0.f, 1.f, .5f), 1.f, 1024,1024, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
 };
 
 
@@ -60,20 +61,22 @@ SpotLight SLightArr[2] = {
 };
 
 
+
+
 //Assimp importer
 Assimp::Importer AImporter = Assimp::Importer();
 
 //Uniform Variable tags
-GLuint UniformModel;
-GLuint UniformProjection;
-GLuint UniformCameraViewPerspective;
-GLuint UniformAmbientCol;
-GLuint UniformAmbientIntensity;
-GLuint UniformDiffuseDir;
-GLuint UniformDiffuseIntensity;
-GLuint UniformSpecularIntensity;
-GLuint UniformSpecularShininess;
-GLuint UniformCameraPosition;
+GLuint UniformModel=0;
+GLuint UniformProjection=0;
+GLuint UniformCameraViewPerspective=0;
+GLuint UniformAmbientCol=0;
+GLuint UniformAmbientIntensity=0;
+GLuint UniformDiffuseDir=0;
+GLuint UniformDiffuseIntensity=0;
+GLuint UniformSpecularIntensity=0;
+GLuint UniformSpecularShininess=0;
+GLuint UniformCameraPosition=0;
 
 //Textures
 Texture BrickTexture, DirtTexture,PlainTexture;
@@ -88,11 +91,84 @@ double DeltaTime = 0.0f;
 double LastTime = 0.0f;
 
 //Vertex shader
-static const char* vShader = "Shaders/shader.vert";
+static const char* vShader1 = "Shaders/shader.vert";
 
 //Fragment shader
-static const char* fShader = "Shaders/shader.frag";
+static const char* fShader1 = "Shaders/shader.frag";
 
+//Shadow map
+static const char* vShader2 = "Shaders/directional_shadow_map.vert";
+
+//Fragment shader
+static const char* fShader2 = "Shaders/directional_shadow_map.frag";
+
+void CreateShaders();
+void CreateObjects();
+void CreateWindow();
+void DirectionalShadowMapPass(DirectionalLight* light);
+void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+void RenderScene();
+
+
+
+int main()
+{
+	CreateWindow();
+	CreateObjects();
+	CreateShaders();
+	//Get aspect ratio (16:9, 4:3, etc.) of buffer
+	float AspectRatio = (Window.getBufferWidth() / Window.getBufferHeight()) * 1.0f;
+
+	//Angle for fov is actually defined along y axis and should be given in radians
+	glm::mat4 projection = glm::perspective(glm::radians(60.0f), (GLfloat)AspectRatio, 0.1f, 100.0f);
+
+	//Set texture paths
+	BrickTexture.setPath((char*)("Textures/brick.png"));
+	BrickTexture.LoadTextureWithAlpha();
+	DirtTexture.setPath((char*)("Textures/dirt.png"));
+	DirtTexture.LoadTextureWithAlpha();
+	
+	ShaderPointers[0]->SetDirectionalLight(&DLight);
+	ShaderPointers[0]->SetPointLight(PLightArr, MAX_POINT_LIGHTS);
+	ShaderPointers[0]->SetSpotLight(SLightArr,1);
+
+	DirectionalShadowShader.SetDirectionalLight(&DLight);
+	DirectionalShadowShader.SetPointLight(PLightArr, MAX_POINT_LIGHTS);
+	DirectionalShadowShader.SetSpotLight(SLightArr, 1);
+
+
+
+	float Offset = 0.00f;
+	float Increment = 0.001f;
+	//glm::mat4 modelmatrix;
+	DLight.CreateShadowMap();
+	
+
+	while (Window.IsOpen())
+	{
+		double now = glfwGetTime();
+		DeltaTime = now - LastTime;
+		LastTime = now;
+		//Creating identity matrix to store the transforms
+		//modelmatrix = glm::mat4(1.0f);
+
+		//Handles keyboard and mouse events
+		Window.PollWindowEvents();
+		Cam.KeyControl(Window.GetKey(), DeltaTime);
+		Cam.MouseControl(Window.GetXChange(), Window.GetYChange(), DeltaTime);
+
+		DirectionalShadowMapPass(&DLight);
+		RenderPass(Cam.CalculateCameraMatrix(), projection);
+
+		
+		
+		//SwapBuffers
+		Window.SwapBuffers();
+		//Disable shader
+		//glUseProgram(0);
+		
+	}
+}
 
 
 //Function which creates mesh
@@ -115,11 +191,11 @@ void CreateObjects()
 	//x,y,z are the vertices of the mesh, u and v are texture wrapping params. nx,ny,nz are normals to the mesh used for lighting
 	//We initialize Vertices with empty normals. We will later pass Vertices into a Calculate normals function
 	GLfloat Vertices[] = {
-		 //x  ,   y    ,  z      u       v         nx      ny      nz               Index
-		-1.0f , -1.0f  ,0.0f ,  0.0f  , 0.0f ,     0.0f , 0.0f ,  0.0f ,             //0
-		 0.0f ,-0.33f , 1.0f ,  0.5f  , 0.0f ,     0.0f , 0.0f ,  0.0f ,             //1
-		 1.0f ,-1.0f   ,0.0f ,  1.0f  , 0.0f ,     0.0f , 0.0f ,  0.0f ,             //2
-		 0.0f , 1.0f   ,0.0f ,  0.5f  , 1.0f ,     0.0f , 0.0f ,  0.0f               //3
+		//x  ,   y    ,  z      u       v         nx      ny      nz               Index
+	   -1.0f , -1.0f  ,0.0f ,  0.0f  , 0.0f ,     0.0f , -1.0f ,  0.0f ,             //0
+		0.0f ,-0.33f , 1.0f ,  0.5f  , 0.0f ,     0.0f , -1.0f ,  0.0f ,             //1
+		1.0f ,-1.0f   ,0.0f ,  1.0f  , 0.0f ,     0.0f , -1.0f ,  0.0f ,             //2
+		0.0f , 1.0f   ,0.0f ,  0.5f  , 1.0f ,     0.0f , -1.0f ,  0.0f               //3
 	};
 
 
@@ -139,7 +215,7 @@ void CreateObjects()
 	Mesh* Obj = new Mesh();
 	Obj->CreateMesh(Vertices, Indices, 32, 12);
 	MeshPointers.push_back(Obj);
-    Obj = new Mesh();
+	Obj = new Mesh();
 	Obj->CreateMesh(floorVertices, floorIndices, 32, 6);
 	MeshPointers.push_back(Obj);
 	Car.LoadModel(std::string("Models/f1mesh.obj"));
@@ -149,21 +225,13 @@ void CreateObjects()
 void CreateShaders()
 {
 	Shader* Shader1 = new Shader();
-	Shader1->CreateShadersFromFiles(vShader, fShader);
+	Shader1->CreateShadersFromFiles(vShader1, fShader1);
 	ShaderPointers.push_back(Shader1);
 
-	//Get uniform location tags/IDs
-	UniformProjection = ShaderPointers[0]->GetUniformProjection();
+	//DirectionalShadowShader = new Shader();
+	DirectionalShadowShader.CreateShadersFromFiles(vShader2, fShader2);
 
-	UniformModel = ShaderPointers[0]->GetUniformModel();
-
-	UniformCameraViewPerspective = ShaderPointers[0]->GetUniformView();
-
-	UniformSpecularIntensity = ShaderPointers[0]->GetUniformSpecularIntensity();
-
-	UniformSpecularShininess = ShaderPointers[0]->GetUniformSpecularShininess();
-
-	UniformCameraPosition = ShaderPointers[0]->GetUniformCameraPosition();
+	
 }
 
 //Function which initialises window
@@ -172,95 +240,90 @@ void CreateWindow()
 	Window.Initialise();
 }
 
-int main()
+
+
+void RenderScene()
 {
-	CreateWindow();
-	CreateObjects();
-	CreateShaders();
-	//Get aspect ratio (16:9, 4:3, etc.) of buffer
-	float AspectRatio = (Window.getBufferWidth() / Window.getBufferHeight()) * 1.0f;
-
-	//Angle for fov is actually defined along y axis and should be given in radians
-	glm::mat4 projection = glm::perspective(60.0f * ToRadians, AspectRatio, 1.0f, 100.f);
-
-	//Set texture paths
-	BrickTexture.setPath((char*)("Textures/brick.png"));
-	BrickTexture.LoadTextureWithAlpha();
-	DirtTexture.setPath((char*)("Textures/dirt.png"));
-	DirtTexture.LoadTextureWithAlpha();
 	
-	ShaderPointers[0]->SetDirectionalLight(&DLight);
-	ShaderPointers[0]->SetPointLight(PLightArr, MAX_POINT_LIGHTS);
-	ShaderPointers[0]->SetSpotLight(SLightArr,2);
+	glm::mat4 model=glm::mat4(1.0f);
 
-	float Offset = 0.00f;
-	float Increment = 0.001f;
-	glm::mat4 modelmatrix;
+	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
+	glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	BrickTexture.UseTexture();
+	ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
+	MeshPointers[0]->RenderMesh();
+
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
+	glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	DirtTexture.UseTexture();
+	ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
+	MeshPointers[1]->RenderMesh();
+
+	model=glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(2.0f, 0.0f, 2.0f));
+	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+	glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
+	Car.RenderModel();
+
+
+}
+
+void DirectionalShadowMapPass(DirectionalLight* light)
+{
+	DirectionalShadowShader.EnableShader();
+
+	//DirectionalShadowShader.EnableDirectionalLight();
+	//DirectionalShadowShader.EnablePointLight();
 	
-
-	while (Window.IsOpen())
-	{
-		double now = glfwGetTime();
-		DeltaTime = now - LastTime;
-		LastTime = now;
-		//Creating identity matrix to store the transforms
-		modelmatrix = glm::mat4(1.0f);
-
-		//Handles keyboard and mouse events
-		Window.PollWindowEvents();
-		Cam.KeyControl(Window.GetKey(), DeltaTime);
-		Cam.MouseControl(Window.GetXChange(), Window.GetYChange(), DeltaTime);
-
-		//Sets color buffer values
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-		//Resets the color buffer and depth buffer
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//Enable shader
-		ShaderPointers[0]->EnableShader();
-		//Enable light
-		//ShaderPointers[0]->EnableDirectionalLight();
-		ShaderPointers[0]->EnablePointLight();
-		glm::vec3 LowerY = Cam.GetCameraPosition();
-		LowerY.y -= 0.1f;
-		SLightArr[1].SetLocationAndDirection(LowerY, Cam.GetCameraDirection());
-		ShaderPointers[0]->EnableSpotLight();
-		
-		
-
-		//Render Mesh 1
-		modelmatrix = glm::translate(modelmatrix, glm::vec3(-2.f, 0.f, 0.0f));
-		modelmatrix = glm::scale(modelmatrix, glm::vec3(.01f, .01f, .01f));
-		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(modelmatrix));
-		glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
-		glm::vec3 CameraPosition = Cam.GetCameraPosition();
-		glUniform3f(UniformCameraPosition, CameraPosition.x, CameraPosition.y, CameraPosition.z);
-		ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
-		Car.RenderModel();
-		//Offset += Increment;
-
-		//Reset transform matrix
-		modelmatrix = glm::mat4(1.0f);
+	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
 
 
-		//Render mesh 2:
-		modelmatrix = glm::translate(modelmatrix, glm::vec3(0, -2.0f, 0.0f));
-		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(modelmatrix));
-		glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(Cam.CalculateCameraMatrix()));
-		ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
-		DirtTexture.UseTexture();
-		
-		
-		
-		ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
-		MeshPointers[1]->RenderMesh();
+	DLight.GetShadowMap()->Write();
+	glClear(GL_DEPTH_BUFFER_BIT);
 
-		//Disable shader
-		ShaderPointers[0]->DisableShader();
-		//SwapBuffers
-		Window.SwapBuffers();
-	}
+	UniformModel = DirectionalShadowShader.GetUniformModel();
+	DirectionalShadowShader.SetDirectionalLightTransform(DLight.CalculateLightTransform());
+
+	RenderScene();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	
+}
+
+void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
+{
+	ShaderPointers[0]->EnableShader();
+
+	UniformModel = ShaderPointers[0]->GetUniformModel();
+	
+	UniformProjection = ShaderPointers[0]->GetUniformProjection();
+	UniformCameraViewPerspective = ShaderPointers[0]->GetUniformView();
+	UniformModel = ShaderPointers[0]->GetUniformModel();
+	UniformCameraPosition = ShaderPointers[0]->GetUniformCameraPosition();
+	UniformSpecularIntensity = ShaderPointers[0]->GetUniformSpecularIntensity();
+	UniformSpecularShininess = ShaderPointers[0]->GetUniformSpecularShininess();
+
+	glViewport(0, 0,Window.getBufferWidth(), Window.getBufferHeight());
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	glUniform3f(UniformCameraPosition, Cam.GetCameraPosition().x, Cam.GetCameraPosition().y, Cam.GetCameraPosition().z);
+
+	ShaderPointers[0]->EnableDirectionalLight();
+	ShaderPointers[0]->EnablePointLight();
+	ShaderPointers[0]->SetDirectionalLightTransform(DLight.CalculateLightTransform());
+
+	DLight.GetShadowMap()->Read(GL_TEXTURE1);
+	ShaderPointers[0]->SetTexture(GLuint(0));
+	ShaderPointers[0]->SetDirectionalShadowMap(GLuint(1));
+
+	//glm::vec3 lowerLight = Cam.GetCameraPosition();
+	
+	//spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
+
+	RenderScene();
 }
