@@ -1,6 +1,6 @@
 #include "ShadowMap.h"
 
-ShadowMap::ShadowMap() :Fbo{ 0 }, sMap{ 0 }, ShadowWidth{ 0 }, ShadowHeight{ 0 }
+ShadowMap::ShadowMap() :Fbo{ 0 }, sMapTexture{ 0 }, ShadowWidth{ 0 }, ShadowHeight{ 0 }
 {}
 
 bool ShadowMap::Init(GLuint Width, GLuint Height)
@@ -9,8 +9,8 @@ bool ShadowMap::Init(GLuint Width, GLuint Height)
 	ShadowHeight = Height;
 	glGenFramebuffers(1, &Fbo);
 
-	glGenTextures(1, &sMap);
-	glBindTexture(GL_TEXTURE_2D, sMap);
+	glGenTextures(1, &sMapTexture);
+	glBindTexture(GL_TEXTURE_2D, sMapTexture);
 	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,ShadowWidth,ShadowHeight,0,GL_DEPTH_COMPONENT,GL_FLOAT,nullptr);
 	//GL_Repeat repeats the texture when coordinate outside 0-1 is given
@@ -30,7 +30,7 @@ bool ShadowMap::Init(GLuint Width, GLuint Height)
 	
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Fbo);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, sMap,0);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, sMapTexture,0);
 
 	//We dont actually want to draw and read this buffer . We just want the shadows
 	glDrawBuffer(GL_NONE);
@@ -60,7 +60,7 @@ void ShadowMap::Write()
 void ShadowMap::Read(GLenum TextureUnit)
 {
 	glActiveTexture(TextureUnit);
-	glBindTexture(GL_TEXTURE_2D, sMap);
+	glBindTexture(GL_TEXTURE_2D, sMapTexture);
 
 
 }
@@ -81,8 +81,8 @@ ShadowMap::~ShadowMap()
 	{
 		glDeleteFramebuffers(1, &Fbo);
 	}
-	if (sMap)
+	if (sMapTexture)
 	{
-		glDeleteTextures(1, &sMap);
+		glDeleteTextures(1, &sMapTexture);
 	}
 }

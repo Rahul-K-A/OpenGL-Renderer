@@ -40,6 +40,7 @@
     PointLight pLightData;
     vec3 SpotLightDirection;
     float Cutoff;
+    bool LightStatus;
   };
 
   //Material information struct
@@ -129,7 +130,7 @@
     //Default specular lighting
     vec4 SpecularLight=vec4(0.0f,0.0f,0.0f,0.0f);
 
-    if(DiffuseFactor>0.0f)
+    if(DiffuseFactor>0.0f && Light.DiffuseIntensity>0.f)
      {
          //Direction from vector a to vector b is normalize(b-a)
          //We find the direction of fragment from the point of the camera view
@@ -203,6 +204,8 @@
 
   vec4 CalculateSpotLight(SpotLight sLight)
   {
+    if(sLight.LightStatus==false)
+        return vec4(0,0,0,0);
     vec4  SpotLightColour=vec4(0,0,0,0);
     vec3 RayDirection=FragmentPosition-sLight.pLightData.LightPosition;
     RayDirection=normalize(RayDirection);

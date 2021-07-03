@@ -23,6 +23,7 @@ public:
 	glm::vec3 GetCameraPosition();
 	//Returns direction camera is facing
 	glm::vec3 GetCameraDirection();
+
 	//Returns boolean for spotlight attached to camera
 	bool GetFlashLightStatus();
 

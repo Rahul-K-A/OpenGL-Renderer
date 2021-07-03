@@ -7,7 +7,13 @@ Light::Light()
 	AmbientIntensity{ 1.0f },
 	DiffuseIntensity{ 1.0f },
 	LightProjection{ glm::mat4(1.f) },
-	sMap{ nullptr }{}
+	ShadowMapWidth{1024},
+	ShadowMapHeight{1024 },
+	//LightProjection{ glm::mat4(1.f) },
+	sMap{nullptr}
+	{
+		sMap = new ShadowMap();
+	}
 
 Light::Light(glm::vec4 AmbientLightParams, GLfloat DiffuseIntensity, GLuint SMapWidth, GLuint SMapHeight)
 	: AmbientColour{ glm::vec3(AmbientLightParams.x,AmbientLightParams.y,AmbientLightParams.z) },
@@ -16,7 +22,10 @@ Light::Light(glm::vec4 AmbientLightParams, GLfloat DiffuseIntensity, GLuint SMap
 	ShadowMapWidth{SMapWidth},
 	ShadowMapHeight{SMapHeight},
 	LightProjection{ glm::mat4(1.f) },
-	sMap{ nullptr }{}
+	sMap{ nullptr }
+{
+	sMap = new ShadowMap();
+}
 
 
 void Light::UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocation,GLuint DiffuseIntensityUniformLocation)
@@ -29,7 +38,7 @@ void Light::UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocatio
 
 void Light::CreateShadowMap()
 {
-	sMap = new ShadowMap();
+	//sMap = new ShadowMap();
 	sMap->Init(ShadowMapWidth, ShadowMapHeight);
 }
 

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <vector>
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include "SpotLight.h"
@@ -19,8 +20,11 @@ public:
 
 	//Creates Shader from string
 	void CreateShadersFromText(const char* vShaderCode, const char* fShaderCode);
-	//Creates shaders from files
+	//Creates shaders from files (vertex and fragment)
 	void CreateShadersFromFiles(const char* vShaderPath, const char* fShaderPath);
+	//Creates shaders from files (vertex ,geometry and fragment)
+	void CreateShadersFromFiles(const char* vShaderPath, const char* gShaderPath,const char* fShaderPath);
+
 	//Reads the shader file and returns cpp string
 	std::string ReadFile(const char* FilePath);
 
@@ -43,10 +47,14 @@ public:
 	void SetSpotLight(SpotLight* TheLight,GLuint NumberOfSpotLights);
 	//Enables information contained within the spot light(s) to be passed on to shader during runtime
 	void EnableSpotLight();
-
-
-	void AttachTexture(GLuint TextureUnit);
-	void AttachShadowMap(GLuint TextureUnit);
+	//Sets a texture unit as tex2dsampler in shader.frag
+	void SetTexture(GLuint TextureUnit);
+	//Sets a texture unit as shadowmap in shader.frag
+	void SetDirectionalShadowMap(GLuint TextureUnit);
+	//Sets a matrix as the light transform  in shader.frag
+	void SetDirectionalLightTransform(glm::mat4 DirectionalLightTransform);
+	void SetLightMatrices(std::vector<glm::mat4> lightMatrices);
+	
 
 	//Returns Uniform variable Model location ID
 	GLuint GetUniformModel();
@@ -68,9 +76,11 @@ public:
 	GLuint GetUniformSpecularShininess();
 	//Returns uniform variable camera view ID
 	GLuint GetUniformCameraPosition();
-	void SetTexture(GLuint TextureUnit);
-	void SetDirectionalShadowMap(GLuint TextureUnit);
-	void SetDirectionalLightTransform(glm::mat4 DirectionalLightTransform);
+	//Returns omni directional light map far plane uniform location Id
+	GLuint GetUniformFarPlane();
+	//Returns omni directional light map point/spot light position uniform location Id
+	GLuint GetUniformOmniLightPosition();
+	
 	
 
 private:
@@ -98,6 +108,12 @@ private:
 	GLuint UniformShadowMap;
 	//UniformLightSpaceTransform
 	GLuint UniformDirectionalLightSpaceTransform;
+	//point and Spot light far plane uniform location ID
+	GLuint UniformFarPlane;
+	//Omni directional light map spot and point light pos
+	GLuint UniformOmniLightPosition;
+	//point and Spot light far plane uniform location ID
+	GLuint UniformLightMatrices[6];
 
 	
 	struct DirectionalLightUniformVars {
@@ -137,6 +153,7 @@ private:
 		GLuint UniformLightPosition;
 		GLuint UniformSpotLightDirection;
 		GLuint UniformCutoff;
+		GLuint UniformSpotLightStatus;
 
 	}SpotLightUniformContainer[MAX_SPOT_LIGHTS];
 	//Spot light array  ptr;
@@ -152,6 +169,10 @@ private:
 	GLuint AddShader(GLuint TheProgram, const char* ShaderCode, GLenum ShaderType);
 	//Compiles the shader
 	void CompileShaders(const char* vShaderCode, const char* fShaderCode);
+	//Compiles the shader
+	void CompileShaders(const char* vShaderCode, const char* gShaderCode,const char* fShaderCode);
+
+	void ValidateShaders();
 
 	void GetAllUniforms();
 };

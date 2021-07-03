@@ -34,6 +34,20 @@ void Shader::CreateShadersFromFiles(const char* vShaderPath, const char* fShader
     CompileShaders(vShaderCode, fShadercode);
 }
 
+void Shader::CreateShadersFromFiles(const char* vShaderPath, const char* gShaderPath, const char* fShaderPath)
+{
+    //Read the strings from files which contain the shaders
+    std::string VertexCodeCpp = ReadFile(vShaderPath);
+    std::string GeometryCodeCpp = ReadFile(gShaderPath);
+    std::string FragmentCodeCpp = ReadFile(fShaderPath);
+    //Convert the Cpp strigs to C strings
+    const char* vShaderCode = VertexCodeCpp.c_str();
+    const char* gShaderCode = GeometryCodeCpp.c_str();
+    const char* fShadercode = FragmentCodeCpp.c_str();
+    //Compile shaders
+    CompileShaders(vShaderCode,gShaderCode, fShadercode);
+}
+
 //Reads the shader files and returns cpp string
 std::string Shader::ReadFile(const char* FilePath)
 {
@@ -44,6 +58,7 @@ std::string Shader::ReadFile(const char* FilePath)
     //Incase path is wrong or file doesnt exist return empty stirng
     if (!FileStream.is_open())
     {
+        std::cout << FilePath<<" not found!!\n";
         return "";
     }
     //String to read the file
@@ -95,14 +110,46 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
     GLuint vShaderLocation = AddShader(ShaderId, vShaderCode, GL_VERTEX_SHADER);
     GLuint fShaderLocation = AddShader(ShaderId, fShaderCode, GL_FRAGMENT_SHADER);
 
-    GLint result = 0;
-    GLchar eLog[1024] = { 0 };
-
     glLinkProgram(ShaderId);
 
     glDeleteShader(vShaderLocation);
     glDeleteShader(fShaderLocation);
 
+    ValidateShaders();
+  
+    GetAllUniforms();
+}
+
+void Shader::CompileShaders(const char* vShaderCode, const char* gShaderCode, const char* fShaderCode)
+{
+    ShaderId = glCreateProgram();
+    if (!ShaderId) {
+        std::cout << "Program was not sucessfully created!!!\n";
+        exit(1);
+    }
+    // std::cout << "Shader id is " << ShaderId << std::endl;
+
+    GLuint vShaderLocation = AddShader(ShaderId, vShaderCode, GL_VERTEX_SHADER);
+    GLuint gShaderLocation = AddShader(ShaderId, gShaderCode, GL_GEOMETRY_SHADER);
+    GLuint fShaderLocation = AddShader(ShaderId, fShaderCode, GL_FRAGMENT_SHADER);
+
+    
+
+    glLinkProgram(ShaderId);
+
+   glDeleteShader(vShaderLocation);
+   glDeleteShader(gShaderLocation);
+   glDeleteShader(fShaderLocation);
+
+  
+   ValidateShaders(); 
+   GetAllUniforms();
+}
+
+void Shader::ValidateShaders()
+{
+    GLint result = 0;
+    GLchar eLog[1024] = { 0 };
     glGetProgramiv(ShaderId, GL_LINK_STATUS, &result);
     if (result == GL_FALSE)
     {
@@ -118,8 +165,7 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
         glGetProgramInfoLog(ShaderId, sizeof(eLog), NULL, eLog);
         std::cout << "Error validating program " << eLog << std::endl;
     }
-  
-    GetAllUniforms();
+
 }
 
 void Shader::GetAllUniforms()
@@ -148,14 +194,15 @@ void Shader::GetAllUniforms()
     //Gets location ID for the shadow map
     UniformShadowMap = glGetUniformLocation(ShaderId, "DirectionalShadowMap");
     UniformDirectionalLightSpaceTransform = glGetUniformLocation(ShaderId, "directionalLightTransform");
-   // std::cout <<"Umode"<< UniformModel << std::endl;
-
+    UniformFarPlane=glGetUniformLocation(ShaderId,"LightPosition");
+    UniformOmniLightPosition=glGetUniformLocation(ShaderId, "farPlane");
+   
 
 
     //Since PointLightUniformContainer is array we use for loop to fill in the values
     for (size_t i = 0; i < MAX_POINT_LIGHTS; i++)
     {
-        char LocationBuffer[100] = { "/0" };
+        char LocationBuffer[100] = { "\0" };
         //snprintf is used to store formatted string within char array
         snprintf(LocationBuffer, sizeof(LocationBuffer), "pLights[%d].LightData.LightColour", i);
         // std::cout << LocationBuffer << std::endl;
@@ -181,7 +228,7 @@ void Shader::GetAllUniforms()
     //Since SpotLightUniformContainer is array we use for loop to fill in the values
     for (size_t i = 0; i < MAX_SPOT_LIGHTS; i++)
     {
-        char LocationBuffer[100] = { "/0" };
+        char LocationBuffer[100] = { "\0" };
         //snprintf is used to store formatted string within char array
         snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].pLightData.LightData.LightColour", i);
         SpotLightUniformContainer[i].UniformAmbientLightColour = glGetUniformLocation(ShaderId, LocationBuffer);
@@ -209,6 +256,17 @@ void Shader::GetAllUniforms()
 
         snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].Cutoff", i);
         SpotLightUniformContainer[i].UniformCutoff = glGetUniformLocation(ShaderId, LocationBuffer);
+
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "sLights[%d].LightStatus", i);
+        SpotLightUniformContainer[i].UniformSpotLightStatus= glGetUniformLocation(ShaderId, LocationBuffer);
+    }
+
+    //Omni shadow map uniforms
+    for (size_t i = 0; i < MAX_SPOT_LIGHTS; i++)
+    {
+        char LocationBuffer[100] = { "\0" };
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "lightMatrices[%d]", i);
+        UniformLightMatrices[i] = glGetUniformLocation(ShaderId, LocationBuffer);
     }
 }
 
@@ -291,9 +349,11 @@ void Shader::EnableSpotLight()
             SpotLightUniformContainer[i].UniformCoeffB,
             SpotLightUniformContainer[i].UniformCoeffC,
             SpotLightUniformContainer[i].UniformSpotLightDirection, 
-            SpotLightUniformContainer[i].UniformCutoff);
+            SpotLightUniformContainer[i].UniformCutoff,
+            SpotLightUniformContainer[i].UniformSpotLightStatus);
     }
 }
+
 
 
 
@@ -349,6 +409,16 @@ GLuint Shader::GetUniformCameraPosition()
     return UniformCameraPosition;
 }
 
+GLuint Shader::GetUniformFarPlane()
+{
+    return UniformFarPlane;
+}
+
+GLuint Shader::GetUniformOmniLightPosition()
+{
+    return UniformOmniLightPosition;
+}
+
 void Shader::SetTexture(GLuint TextureUnit)
 {
     glUniform1i(UniformTex2DSampler, TextureUnit);
@@ -362,6 +432,14 @@ void Shader::SetDirectionalShadowMap(GLuint TextureUnit)
 void Shader::SetDirectionalLightTransform(glm::mat4 DirectionalLightTransform)
 {
     glUniformMatrix4fv(UniformDirectionalLightSpaceTransform,1,GL_FALSE,glm::value_ptr(DirectionalLightTransform));
+}
+
+void Shader::SetLightMatrices(std::vector<glm::mat4> lightMatrices)
+{
+    for (size_t i = 0; i < 6; i++)
+    {
+        glUniformMatrix4fv(UniformLightMatrices[i], 1, GL_FALSE, glm::value_ptr(lightMatrices[i]));
+    }
 }
 
 

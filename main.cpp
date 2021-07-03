@@ -18,6 +18,19 @@
 #include "Model.h"
 #include <assimp/Importer.hpp>
 
+
+//-------------------------FUNCTIONS------------------------------------------------------
+void CreateShaders();
+void CreateObjects();
+void CreateWindow();
+void DirectionalShadowMapPass(DirectionalLight* light);
+void OmniDirectionalShadowMapPass(PointLight* light);
+void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+void RenderScene();
+//---------------------------------------------------------------------------------------
+
+
+//-------------------------GLOBAL VARIABLES------------------------------------------------------
 //Window object
 MyWindow Window(1024,576);
 
@@ -25,7 +38,7 @@ MyWindow Window(1024,576);
 Camera Cam(glm::vec3(0.0f, 1.0f, 5.f), -90.0f, 0.0f, 4.0f, 40.0f);
 
 //Light
-DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, .1f), glm::vec4(0.0f, -15.f, -10.0f, 0.3f),2048,2048);
+DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f), glm::vec4(0.0f, -15.f, -10.0f, 0.f),2048,2048);
 float Intensity;
 
 //Material
@@ -37,6 +50,7 @@ Material DullMaterial(10.f, 4);
 std::vector<Mesh*> MeshPointers;
 std::vector<Shader*> ShaderPointers;
 Shader DirectionalShadowShader;
+Shader OmniShadowShader;
 
 //Model F1 Car
 Model Car=Model();
@@ -47,18 +61,77 @@ Model Car=Model();
 
 //PointLights
 PointLight PLightArr[MAX_POINT_LIGHTS] = {
- PointLight(glm::vec4(1.f, 0.f, 0.f, .5f),  1.f ,1024,1024, glm::vec3(0.f,0.0f, 0.0f) , glm::vec3(0.3f, 0.2f, 0.1f)),
- PointLight(glm::vec4(0.f, 1.f, 0.f, .5f), 1.f, 1024,1024, glm::vec3(-4.f, 0.0f, 0.f), glm::vec3(0.3f, 0.2f, 0.1f)),
- PointLight(glm::vec4(0.f, 0.f, 1.f, .5f), 1.f, 1024,1024, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
+ PointLight(		glm::vec4(1.f, 0.f, 0.f, .5f),
+					1.f ,
+					1024,
+					1024,
+					glm::vec3(6.f, 1.0f, 5.0f) ,
+					glm::vec3(0.3f, 0.2f, 0.1f),
+					0.01f,
+					100.f),
+
+ PointLight(	    glm::vec4(0.f, 1.f, 0.f, .5f),
+					1.f, 
+					1024,
+					1024,
+					glm::vec3(-4.f, 1.0f, -5.f),
+					glm::vec3(0.3f, 0.2f, 0.1f),
+					0.01f,
+				    100.f),
+
+ PointLight(glm::vec4(0.f, 0.f, 1.f, .5f),
+					1.f,
+					1024,
+					1024,
+					glm::vec3(-4.f, 1.0f, 5.f),
+					glm::vec3(0.3f, 0.2f, 0.1f),
+					0.01f,
+					100.f),
+ //PointLight(glm::vec4(0.f, 0.f, 1.f, .5f), 1.f, 1024,1024, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f),0.01f,100.f)
 };
 
+
+SpotLight SLightArr[MAX_SPOT_LIGHTS] = {
+ SpotLight(			glm::vec4(1.f, 1.f, 1.f, 1.f),
+					2.f ,
+					1024,
+					1024,
+					glm::vec3(2.f, 0.75f, 0.0f) ,
+					glm::vec3(1.f, 0.f, 0.f),
+					0.01f,
+					100.f,
+					glm::vec3(0,0,1),
+					20.f),
+
+ SpotLight(			glm::vec4(1.f, 1.f, 1.f, 1.f),
+					2.f,
+					1024,
+					1024,
+					glm::vec3(0.f, 0.0f, 0.f),
+					glm::vec3(1.f, 0.0f, 0.0f),
+					0.01f,
+					100.f,
+					glm::vec3(0,-1,0),
+					20.f),
+
+ SpotLight(			glm::vec4(0.f, 0.f, 1.f, .5f),
+					1.f,
+					1024,
+					1024,
+					glm::vec3(0.f, 0.0f, 3.f),
+					glm::vec3(1.f, 0.0f, 0.0f),
+					0.01f,
+					100.f,
+					glm::vec3(0,-1,0),
+					20.f),
+};
 
 //SpotLights
-SpotLight SLightArr[2] = {
- SpotLight( glm::vec4(1.f, 1.f, 1.f, .0f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 20.f),
- SpotLight(glm::vec4(1.f, 1.f, 1.f, 10.f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 20.f),
- //SpotLight(glm::vec4(0.f, 0.f, 1.f, .2f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
-};
+//SpotLight SLightArr[2] = {
+// SpotLight( glm::vec4(1.f, 1.f, 1.f, .0f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 20.f),
+// SpotLight(glm::vec4(1.f, 1.f, 1.f, 10.f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 20.f),
+// //SpotLight(glm::vec4(0.f, 0.f, 1.f, .2f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
+//};
 
 
 
@@ -77,6 +150,8 @@ GLuint UniformDiffuseIntensity=0;
 GLuint UniformSpecularIntensity=0;
 GLuint UniformSpecularShininess=0;
 GLuint UniformCameraPosition=0;
+GLuint UniformOmniLightPos = 0;
+GLuint UniformFarPlane = 0;
 
 //Textures
 Texture BrickTexture, DirtTexture,PlainTexture;
@@ -96,20 +171,25 @@ static const char* vShader1 = "Shaders/shader.vert";
 //Fragment shader
 static const char* fShader1 = "Shaders/shader.frag";
 
-//Shadow map
+//Directional Shadow map
 static const char* vShader2 = "Shaders/directional_shadow_map.vert";
 
 //Fragment shader
 static const char* fShader2 = "Shaders/directional_shadow_map.frag";
 
-void CreateShaders();
-void CreateObjects();
-void CreateWindow();
-void DirectionalShadowMapPass(DirectionalLight* light);
-void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
-void RenderScene();
+//OmniDirectional Shadow map
+static const char* vShader3 = "Shaders/omni_shadow_map.vert";
+
+//Fragment shader
+static const char* gShader3 = "Shaders/omni_shadow_map.geom";
+
+//Fragment shader
+static const char* fShader3 = "Shaders/omni_shadow_map.frag";
+
+//----------------------------------------------------------------------------------------
 
 
+//----------------------------------------MAIN-------------------------------------------------------------------------------------------------
 
 int main()
 {
@@ -130,20 +210,23 @@ int main()
 	
 	ShaderPointers[0]->SetDirectionalLight(&DLight);
 	ShaderPointers[0]->SetPointLight(PLightArr, MAX_POINT_LIGHTS);
-	ShaderPointers[0]->SetSpotLight(SLightArr,1);
+	ShaderPointers[0]->SetSpotLight(SLightArr,2);
 
-	DirectionalShadowShader.SetDirectionalLight(&DLight);
-	DirectionalShadowShader.SetPointLight(PLightArr, MAX_POINT_LIGHTS);
-	DirectionalShadowShader.SetSpotLight(SLightArr, 1);
-
+	//DirectionalShadowShader.SetDirectionalLight(&DLight);
+	//DirectionalShadowShader.SetPointLight(PLightArr, MAX_POINT_LIGHTS);
+	//DirectionalShadowShader.SetSpotLight(SLightArr, 1);
+	//OmniShadowShader.SetDirectionalLight(&DLight);
+	//OmniShadowShader.SetPointLight(PLightArr, MAX_POINT_LIGHTS);
 
 
 	float Offset = 0.00f;
 	float Increment = 0.001f;
 	//glm::mat4 modelmatrix;
 	DLight.CreateShadowMap();
-	
-
+	for (size_t i = 0; i < MAX_POINT_LIGHTS; i++)
+		PLightArr[i].CreateShadowMap();
+	for (size_t i = 0; i < MAX_SPOT_LIGHTS; i++)
+		PLightArr[i].CreateShadowMap();
 	while (Window.IsOpen())
 	{
 		double now = glfwGetTime();
@@ -151,12 +234,23 @@ int main()
 		LastTime = now;
 		//Creating identity matrix to store the transforms
 		//modelmatrix = glm::mat4(1.0f);
+		glm::vec3 lowerLight = Cam.GetCameraPosition();
+		lowerLight.y = lowerLight.y - 0.2;
+		SLightArr[1].SetLightStatus(Cam.GetFlashLightStatus());
 
+		SLightArr[1].SetLocationAndDirection(lowerLight, Cam.GetCameraDirection());
 		//Handles keyboard and mouse events
 		Window.PollWindowEvents();
 		Cam.KeyControl(Window.GetKey(), DeltaTime);
 		Cam.MouseControl(Window.GetXChange(), Window.GetYChange(), DeltaTime);
-
+		for (size_t i = 0; i < MAX_POINT_LIGHTS; i++)
+		{
+			OmniDirectionalShadowMapPass(PLightArr + i);
+		}
+		for (size_t i = 0; i <2; i++)
+		{
+			OmniDirectionalShadowMapPass(SLightArr + i);
+		}
 		DirectionalShadowMapPass(&DLight);
 		RenderPass(Cam.CalculateCameraMatrix(), projection);
 
@@ -170,6 +264,11 @@ int main()
 	}
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//----------------------------------------FUNCTION DEFINITIONS-------------------------------------------------------------------------------------------------
 
 //Function which creates mesh
 void CreateObjects()
@@ -227,10 +326,12 @@ void CreateShaders()
 	Shader* Shader1 = new Shader();
 	Shader1->CreateShadersFromFiles(vShader1, fShader1);
 	ShaderPointers.push_back(Shader1);
-
+	std::cout << "Shader 1 done\n";
 	//DirectionalShadowShader = new Shader();
 	DirectionalShadowShader.CreateShadersFromFiles(vShader2, fShader2);
-
+	std::cout << "Shader 2 done\n";
+	OmniShadowShader.CreateShadersFromFiles(vShader3, gShader3, fShader3);
+	std::cout << "Shader 3 done\n";
 	
 }
 
@@ -267,7 +368,7 @@ void RenderScene()
 	ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
 	Car.RenderModel();
 
-
+	glUseProgram(0);
 }
 
 void DirectionalShadowMapPass(DirectionalLight* light)
@@ -291,12 +392,34 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 	
 }
 
+void OmniDirectionalShadowMapPass(PointLight* light)
+{
+	OmniShadowShader.EnableShader();
+
+	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
+
+
+	DLight.GetShadowMap()->Write();
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	UniformModel = DirectionalShadowShader.GetUniformModel();
+	UniformOmniLightPos=OmniShadowShader.GetUniformOmniLightPosition();
+	UniformFarPlane=OmniShadowShader.GetUniformFarPlane();
+	OmniShadowShader.SetDirectionalLightTransform(DLight.CalculateLightTransform());
+
+	glUniform3f(UniformOmniLightPos, light->GetLightPosition().x, light->GetLightPosition().y, light->GetLightPosition().z);
+	glUniform1f(UniformFarPlane, light->GetFarPlane());
+	OmniShadowShader.SetLightMatrices(light->CalculateLightMatrices());
+	RenderScene();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+}
+
 void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 {
 	ShaderPointers[0]->EnableShader();
+	//ShaderPointers[0]->EnablePointLight();
 
 	UniformModel = ShaderPointers[0]->GetUniformModel();
-	
 	UniformProjection = ShaderPointers[0]->GetUniformProjection();
 	UniformCameraViewPerspective = ShaderPointers[0]->GetUniformView();
 	UniformModel = ShaderPointers[0]->GetUniformModel();
@@ -312,18 +435,18 @@ void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 	glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 	glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 	glUniform3f(UniformCameraPosition, Cam.GetCameraPosition().x, Cam.GetCameraPosition().y, Cam.GetCameraPosition().z);
-
 	ShaderPointers[0]->EnableDirectionalLight();
 	ShaderPointers[0]->EnablePointLight();
+	ShaderPointers[0]->EnableSpotLight();
 	ShaderPointers[0]->SetDirectionalLightTransform(DLight.CalculateLightTransform());
 
 	DLight.GetShadowMap()->Read(GL_TEXTURE1);
 	ShaderPointers[0]->SetTexture(GLuint(0));
 	ShaderPointers[0]->SetDirectionalShadowMap(GLuint(1));
 
-	//glm::vec3 lowerLight = Cam.GetCameraPosition();
-	
-	//spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
+;
 
 	RenderScene();
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------

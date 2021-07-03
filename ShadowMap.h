@@ -12,11 +12,11 @@ public:
 	GLuint GetShadowHeight();
 
 	~ShadowMap();
-private:
+protected:
 	//Frame buffer object 
 	GLuint Fbo;
 	//Shadow map texture
-	GLuint sMap;
+	GLuint sMapTexture;
 	GLuint ShadowWidth, ShadowHeight;
 };
 
