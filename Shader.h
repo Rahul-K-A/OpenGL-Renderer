@@ -34,6 +34,8 @@ public:
 	void DisableShader();
 	//Completely clears the shader
 	void ClearShaders();
+
+	void ValidateShaders();
     
 	//Attaches a directional light to the shader to pass information
 	void SetDirectionalLight(DirectionalLight* TheLight);
@@ -42,11 +44,11 @@ public:
 	//Attaches a point light to the shader to pass information
 	void SetPointLight(PointLight* TheLight, GLuint PointLightCount);
 	//Enables information contained within the point light(s) to be passed on to shader during runtime
-	void EnablePointLight();
+	void EnablePointLight(GLuint TexUnit);
 	//Attaches spot light to communicate with shader
 	void SetSpotLight(SpotLight* TheLight,GLuint NumberOfSpotLights);
 	//Enables information contained within the spot light(s) to be passed on to shader during runtime
-	void EnableSpotLight();
+	void EnableSpotLight(GLuint TexUnit);
 	//Sets a texture unit as tex2dsampler in shader.frag
 	void SetTexture(GLuint TextureUnit);
 	//Sets a texture unit as shadowmap in shader.frag
@@ -156,6 +158,13 @@ private:
 		GLuint UniformSpotLightStatus;
 
 	}SpotLightUniformContainer[MAX_SPOT_LIGHTS];
+
+
+
+	struct OmniMapUniformVars {
+		GLuint UniformFPlane;
+		GLuint UniformShadowTexture;
+	}OmniMapUniformContainer[MAX_SPOT_LIGHTS+MAX_POINT_LIGHTS];
 	//Spot light array  ptr;
 	SpotLight* sLight;
 	//Spot Light array count
@@ -172,7 +181,7 @@ private:
 	//Compiles the shader
 	void CompileShaders(const char* vShaderCode, const char* gShaderCode,const char* fShaderCode);
 
-	void ValidateShaders();
+	
 
 	void GetAllUniforms();
 };

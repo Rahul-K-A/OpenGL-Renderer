@@ -54,6 +54,7 @@ Shader OmniShadowShader;
 
 //Model F1 Car
 Model Car=Model();
+//Model Floor = Model();
 //Model path
 
 
@@ -61,16 +62,16 @@ Model Car=Model();
 
 //PointLights
 PointLight PLightArr[MAX_POINT_LIGHTS] = {
- PointLight(		glm::vec4(1.f, 0.f, 0.f, .5f),
-					1.f ,
+ PointLight(		glm::vec4(1.f, 0.f, 0.f, 1.5f),
+					1.5f ,
 					1024,
 					1024,
-					glm::vec3(6.f, 1.0f, 5.0f) ,
+					glm::vec3(6.f, 1.0f, 0.0f) ,
 					glm::vec3(0.3f, 0.2f, 0.1f),
 					0.01f,
 					100.f),
 
- PointLight(	    glm::vec4(0.f, 1.f, 0.f, .5f),
+ PointLight(	    glm::vec4(0.f, 1.f, 0.f, 1.0f),
 					1.f, 
 					1024,
 					1024,
@@ -79,7 +80,7 @@ PointLight PLightArr[MAX_POINT_LIGHTS] = {
 					0.01f,
 				    100.f),
 
- PointLight(glm::vec4(0.f, 0.f, 1.f, .5f),
+ PointLight(glm::vec4(0.f, 0.f, 1.f, 1.0f),
 					1.f,
 					1024,
 					1024,
@@ -92,8 +93,8 @@ PointLight PLightArr[MAX_POINT_LIGHTS] = {
 
 
 SpotLight SLightArr[MAX_SPOT_LIGHTS] = {
- SpotLight(			glm::vec4(1.f, 1.f, 1.f, 1.f),
-					2.f ,
+ SpotLight(			glm::vec4(1.f, 1.f, 1.f, 0.f),
+					0.f ,
 					1024,
 					1024,
 					glm::vec3(2.f, 0.75f, 0.0f) ,
@@ -103,8 +104,8 @@ SpotLight SLightArr[MAX_SPOT_LIGHTS] = {
 					glm::vec3(0,0,1),
 					20.f),
 
- SpotLight(			glm::vec4(1.f, 1.f, 1.f, 1.f),
-					2.f,
+ SpotLight(			glm::vec4(1.f, 1.f, 1.f, 10.f),
+					20.f,
 					1024,
 					1024,
 					glm::vec3(0.f, 0.0f, 0.f),
@@ -212,13 +213,6 @@ int main()
 	ShaderPointers[0]->SetPointLight(PLightArr, MAX_POINT_LIGHTS);
 	ShaderPointers[0]->SetSpotLight(SLightArr,2);
 
-	//DirectionalShadowShader.SetDirectionalLight(&DLight);
-	//DirectionalShadowShader.SetPointLight(PLightArr, MAX_POINT_LIGHTS);
-	//DirectionalShadowShader.SetSpotLight(SLightArr, 1);
-	//OmniShadowShader.SetDirectionalLight(&DLight);
-	//OmniShadowShader.SetPointLight(PLightArr, MAX_POINT_LIGHTS);
-
-
 	float Offset = 0.00f;
 	float Increment = 0.001f;
 	//glm::mat4 modelmatrix;
@@ -226,19 +220,14 @@ int main()
 	for (size_t i = 0; i < MAX_POINT_LIGHTS; i++)
 		PLightArr[i].CreateShadowMap();
 	for (size_t i = 0; i < MAX_SPOT_LIGHTS; i++)
-		PLightArr[i].CreateShadowMap();
+		SLightArr[i].CreateShadowMap();
 	while (Window.IsOpen())
 	{
 		double now = glfwGetTime();
 		DeltaTime = now - LastTime;
 		LastTime = now;
-		//Creating identity matrix to store the transforms
-		//modelmatrix = glm::mat4(1.0f);
-		glm::vec3 lowerLight = Cam.GetCameraPosition();
-		lowerLight.y = lowerLight.y - 0.2;
-		SLightArr[1].SetLightStatus(Cam.GetFlashLightStatus());
+		
 
-		SLightArr[1].SetLocationAndDirection(lowerLight, Cam.GetCameraDirection());
 		//Handles keyboard and mouse events
 		Window.PollWindowEvents();
 		Cam.KeyControl(Window.GetKey(), DeltaTime);
@@ -258,8 +247,7 @@ int main()
 		
 		//SwapBuffers
 		Window.SwapBuffers();
-		//Disable shader
-		//glUseProgram(0);
+	
 		
 	}
 }
@@ -318,6 +306,7 @@ void CreateObjects()
 	Obj->CreateMesh(floorVertices, floorIndices, 32, 6);
 	MeshPointers.push_back(Obj);
 	Car.LoadModel(std::string("Models/f1mesh.obj"));
+	//Floor.LoadModel(std::string("Models/Floor.fbx"));
 }
 
 //Function which creates shader
@@ -349,10 +338,12 @@ void RenderScene()
 	glm::mat4 model=glm::mat4(1.0f);
 
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
+	model = glm::scale(model, glm::vec3(10, 0, 10));
 	glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
 	BrickTexture.UseTexture();
 	ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
-	MeshPointers[0]->RenderMesh();
+	//MeshPointers[0]->RenderMesh();
+	//Floor.RenderModel();
 
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
@@ -362,7 +353,7 @@ void RenderScene()
 	MeshPointers[1]->RenderMesh();
 
 	model=glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(2.0f, 0.0f, 2.0f));
+	model = glm::translate(model, glm::vec3(2.0f, -1.0f, 5.0f));
 	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 	glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
 	ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
@@ -381,12 +372,12 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
 
 
-	DLight.GetShadowMap()->Write();
+	light->GetShadowMap()->Write();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	UniformModel = DirectionalShadowShader.GetUniformModel();
 	DirectionalShadowShader.SetDirectionalLightTransform(DLight.CalculateLightTransform());
-
+	DirectionalShadowShader.ValidateShaders();
 	RenderScene();
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	
@@ -399,25 +390,27 @@ void OmniDirectionalShadowMapPass(PointLight* light)
 	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
 
 
-	DLight.GetShadowMap()->Write();
+	light->GetShadowMap()->Write();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	UniformModel = DirectionalShadowShader.GetUniformModel();
+	UniformModel = OmniShadowShader.GetUniformModel();
 	UniformOmniLightPos=OmniShadowShader.GetUniformOmniLightPosition();
 	UniformFarPlane=OmniShadowShader.GetUniformFarPlane();
-	OmniShadowShader.SetDirectionalLightTransform(DLight.CalculateLightTransform());
 
 	glUniform3f(UniformOmniLightPos, light->GetLightPosition().x, light->GetLightPosition().y, light->GetLightPosition().z);
 	glUniform1f(UniformFarPlane, light->GetFarPlane());
 	OmniShadowShader.SetLightMatrices(light->CalculateLightMatrices());
+
+	OmniShadowShader.ValidateShaders();
+	glCullFace(GL_FRONT);
 	RenderScene();
+	glCullFace(GL_BACK);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
 void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 {
 	ShaderPointers[0]->EnableShader();
-	//ShaderPointers[0]->EnablePointLight();
 
 	UniformModel = ShaderPointers[0]->GetUniformModel();
 	UniformProjection = ShaderPointers[0]->GetUniformProjection();
@@ -436,16 +429,18 @@ void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 	glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 	glUniform3f(UniformCameraPosition, Cam.GetCameraPosition().x, Cam.GetCameraPosition().y, Cam.GetCameraPosition().z);
 	ShaderPointers[0]->EnableDirectionalLight();
-	ShaderPointers[0]->EnablePointLight();
-	ShaderPointers[0]->EnableSpotLight();
+	ShaderPointers[0]->EnablePointLight(3);
+	ShaderPointers[0]->EnableSpotLight(3+MAX_POINT_LIGHTS);
 	ShaderPointers[0]->SetDirectionalLightTransform(DLight.CalculateLightTransform());
 
-	DLight.GetShadowMap()->Read(GL_TEXTURE1);
-	ShaderPointers[0]->SetTexture(GLuint(0));
-	ShaderPointers[0]->SetDirectionalShadowMap(GLuint(1));
-
-;
-
+	DLight.GetShadowMap()->Read(GL_TEXTURE2);
+	ShaderPointers[0]->SetTexture(GLuint(1));
+	ShaderPointers[0]->SetDirectionalShadowMap(GLuint(2));
+	glm::vec3 lowerLight = Cam.GetCameraPosition();
+	lowerLight.y = lowerLight.y - 0.2;
+	SLightArr[1].SetLightStatus(Cam.GetFlashLightStatus());
+	SLightArr[1].SetLocationAndDirection(lowerLight, Cam.GetCameraDirection());
+	ShaderPointers[0]->ValidateShaders();
 	RenderScene();
 }
 

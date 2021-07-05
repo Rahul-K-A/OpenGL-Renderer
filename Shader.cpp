@@ -115,7 +115,7 @@ void Shader::CompileShaders(const char* vShaderCode, const char* fShaderCode)
     glDeleteShader(vShaderLocation);
     glDeleteShader(fShaderLocation);
 
-    ValidateShaders();
+    //ValidateShaders();
   
     GetAllUniforms();
 }
@@ -142,7 +142,7 @@ void Shader::CompileShaders(const char* vShaderCode, const char* gShaderCode, co
    glDeleteShader(fShaderLocation);
 
   
-   ValidateShaders(); 
+  // ValidateShaders(); 
    GetAllUniforms();
 }
 
@@ -194,8 +194,8 @@ void Shader::GetAllUniforms()
     //Gets location ID for the shadow map
     UniformShadowMap = glGetUniformLocation(ShaderId, "DirectionalShadowMap");
     UniformDirectionalLightSpaceTransform = glGetUniformLocation(ShaderId, "directionalLightTransform");
-    UniformFarPlane=glGetUniformLocation(ShaderId,"LightPosition");
-    UniformOmniLightPosition=glGetUniformLocation(ShaderId, "farPlane");
+    UniformOmniLightPosition =glGetUniformLocation(ShaderId,"LightPosition");
+    UniformFarPlane =glGetUniformLocation(ShaderId, "farPlane");
    
 
 
@@ -262,12 +262,23 @@ void Shader::GetAllUniforms()
     }
 
     //Omni shadow map uniforms
-    for (size_t i = 0; i < MAX_SPOT_LIGHTS; i++)
+    for (size_t i = 0; i <6; i++)
     {
         char LocationBuffer[100] = { "\0" };
         snprintf(LocationBuffer, sizeof(LocationBuffer), "lightMatrices[%d]", i);
         UniformLightMatrices[i] = glGetUniformLocation(ShaderId, LocationBuffer);
+        //std::cout << UniformLightMatrices[i] << std::endl;
     }
+
+    for (size_t i = 0; i < MAX_POINT_LIGHTS + MAX_SPOT_LIGHTS; i++)
+    {
+        char LocationBuffer[100] = { "\0" };
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "OSMap[%d].ShadowTexture", i);
+        OmniMapUniformContainer[i].UniformShadowTexture = glGetUniformLocation(ShaderId, LocationBuffer);
+        snprintf(LocationBuffer, sizeof(LocationBuffer), "OSMap[%d].FarPlane", i);
+        OmniMapUniformContainer[i].UniformFPlane = glGetUniformLocation(ShaderId, LocationBuffer);
+    }
+
 }
 
 //Enables shaders
@@ -313,7 +324,7 @@ void Shader::SetPointLight(PointLight* TheLight, GLuint NumberOfPointLights)
     pLight = TheLight;
 }
 
-void Shader::EnablePointLight()
+void Shader::EnablePointLight(GLuint TexUnit)
 {
     glUniform1i(UniformPointLightCount, PointLightCount);
     for (size_t i = 0; i < PointLightCount; i++)
@@ -326,6 +337,11 @@ void Shader::EnablePointLight()
             PointLightUniformContainer[i].UniformCoeffA,
             PointLightUniformContainer[i].UniformCoeffB,
             PointLightUniformContainer[i].UniformCoeffC);
+            pLight[i].GetShadowMap()->Read(GL_TEXTURE0 + TexUnit+i);
+            glUniform1i(OmniMapUniformContainer[i].UniformShadowTexture,TexUnit+i);
+            glUniform1f(OmniMapUniformContainer[i].UniformFPlane,pLight[i].GetFarPlane());
+      
+
     }
 }
 
@@ -336,7 +352,7 @@ void Shader::SetSpotLight(SpotLight* TheLight, GLuint NumberOfSpotLights)
     SpotLightCount = NumberOfSpotLights;
 }
 
-void Shader::EnableSpotLight()
+void Shader::EnableSpotLight(GLuint TexUnit)
 {
     glUniform1i(UniformSpotLightCount, SpotLightCount);
     for (size_t i = 0; i < SpotLightCount; i++)
@@ -351,6 +367,9 @@ void Shader::EnableSpotLight()
             SpotLightUniformContainer[i].UniformSpotLightDirection, 
             SpotLightUniformContainer[i].UniformCutoff,
             SpotLightUniformContainer[i].UniformSpotLightStatus);
+            sLight[i].GetShadowMap()->Read(GL_TEXTURE0 + TexUnit + i);
+            glUniform1i(OmniMapUniformContainer[i+PointLightCount].UniformShadowTexture, TexUnit+ i);
+            glUniform1f(OmniMapUniformContainer[i+PointLightCount].UniformFPlane, sLight[i].GetFarPlane());
     }
 }
 
@@ -439,6 +458,7 @@ void Shader::SetLightMatrices(std::vector<glm::mat4> lightMatrices)
     for (size_t i = 0; i < 6; i++)
     {
         glUniformMatrix4fv(UniformLightMatrices[i], 1, GL_FALSE, glm::value_ptr(lightMatrices[i]));
+        //td::cout << UniformLightMatrices[i] << std::endl<<std::endl;
     }
 }
 

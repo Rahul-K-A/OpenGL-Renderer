@@ -50,7 +50,10 @@
   };
 
  
-
+struct OmniShadowMap{
+    samplerCube ShadowTexture;
+    float FarPlane;
+};
   //Directional light uniform variable
   uniform DirectionalLight dLight;
 
@@ -76,9 +79,24 @@
   //Camera position vector
   uniform vec3 CameraViewPosition;
 
-  
+  uniform OmniShadowMap OSMap[MAX_POINT_LIGHTS+MAX_SPOT_LIGHTS];
 
-  float CalculateShadowFactor()
+
+
+
+
+  float CalculatePointLightShadowFactor(PointLight pLight,int ShadowIndex)
+  {
+    vec3 FragmentToLight=FragmentPosition-pLight.LightPosition;
+    float ClosestDepth=texture(OSMap[ShadowIndex].ShadowTexture,FragmentToLight).r;
+    ClosestDepth*=OSMap[ShadowIndex].FarPlane;
+    float CurrentDepth=length(FragmentToLight);
+    float bias =0.15;
+    float Shadow=CurrentDepth-bias>ClosestDepth?1.0:0.0;
+    return Shadow;
+  }
+
+  float CalculateDirectionalLightShadowFactor()
   {
     //Convert to normalised device coords
     vec3 ProjectionCoords=DirectionalLightSpacePosition.xyz/DirectionalLightSpacePosition.w;
@@ -115,8 +133,8 @@
   }
 
   //Calculates light from a given direction
-   vec4 CalculateLightByDirection(Light Light,vec3 Direction,float ShadowFactor)
-  {
+    vec4 CalculateLightByDirection(Light Light,vec3 Direction,float ShadowFactor)
+    {
    //Calculates ambient lighting
     vec4 AmbientLight= vec4(Light.LightColour,1.0f)*Light.AmbientIntensity;
 
@@ -159,12 +177,12 @@
 
   //Caclulates lighting for a given directional light
   vec4 CalculateDirectionalLight(){
-     float ShadowFactor=CalculateShadowFactor();
+     float ShadowFactor=CalculateDirectionalLightShadowFactor();
      return CalculateLightByDirection(dLight.LightData,dLight.Direction,ShadowFactor);
   }
 
   //Calculates lighting for a singular point Light
-  vec4 CalculatePointLight(PointLight pLight)
+  vec4 CalculatePointLight(PointLight pLight,int ShadowIndex)
   {
        //vec4 pLightColor=vec4(0,0,0,0);
      //This gives the direction from the face to the light source, 
@@ -175,7 +193,8 @@
         LightToFragmentDirection=normalize(LightToFragmentDirection);
         //While taking the distance from the face to the light as opposed to taking it from the light to the face seems unintuitive, the negative in our reflection function
         //will work properly now and give reflection
-         vec4 pLightColour=CalculateLightByDirection(pLight.LightData,LightToFragmentDirection,0.0f);
+        float SFactor=CalculatePointLightShadowFactor(pLight,ShadowIndex);
+        vec4 pLightColour=CalculateLightByDirection(pLight.LightData,LightToFragmentDirection,SFactor);
         //Calculates attenuation
         float Attenuation= pLight.A*Distance*Distance + pLight.B*Distance + pLight.C;
         //Divide by Attenuation factor to simulate light falloff
@@ -195,14 +214,14 @@
     //Iterates through array
     for (int i=0;i<PointLightCount;i++)
     {
-        TotalColour=TotalColour+CalculatePointLight(pLights[i]);
+        TotalColour=TotalColour+CalculatePointLight(pLights[i],i);
     }
     return TotalColour;
 
   }
 
 
-  vec4 CalculateSpotLight(SpotLight sLight)
+  vec4 CalculateSpotLight(SpotLight sLight,int ShadowIndex)
   {
     if(sLight.LightStatus==false)
         return vec4(0,0,0,0);
@@ -212,12 +231,13 @@
     float SpotLightFactor=dot(RayDirection,sLight.SpotLightDirection);
     if(SpotLightFactor>sLight.Cutoff)
     {
-        SpotLightColour=CalculatePointLight(sLight.pLightData);
+        SpotLightColour=CalculatePointLight(sLight.pLightData,ShadowIndex);
         //Gets smooth edges around spot light
-        SpotLightColour.x =  SpotLightColour.x * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
-        SpotLightColour.y =  SpotLightColour.y * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
-        SpotLightColour.z =  SpotLightColour.z * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
-        SpotLightColour.w =  SpotLightColour.w * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+
+        SpotLightColour =  SpotLightColour* (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+        //SpotLightColour.y =  SpotLightColour.y * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+        //SpotLightColour.z =  SpotLightColour.z * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+        //SpotLightColour.w =  SpotLightColour.w * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
 
     }
     return SpotLightColour;
@@ -230,7 +250,7 @@
     vec4 TotalColour=vec4(0,0,0,0);
     for(int i=0;i<SpotLightCount;i++)
     {
-        TotalColour=TotalColour+CalculateSpotLight(sLights[i]);
+        TotalColour=TotalColour+CalculateSpotLight(sLights[i],i+PointLightCount);
     }
     return TotalColour;
     

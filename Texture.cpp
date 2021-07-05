@@ -94,7 +94,7 @@ bool Texture::LoadTextureWithAlpha()
 void Texture::UseTexture()
 {
 	//glActiveTexture selects which texture unit of the state machine subsequent texture state calls will affect.
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, TextureID);
 }
 
