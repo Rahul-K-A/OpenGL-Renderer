@@ -321,7 +321,7 @@ void Shader::SetPointLight(PointLight* TheLight, GLuint NumberOfPointLights)
 {
     if (NumberOfPointLights > MAX_POINT_LIGHTS) NumberOfPointLights = MAX_POINT_LIGHTS;
     PointLightCount = NumberOfPointLights;
-    std::cout << "Poin light count " << PointLightCount << std::endl;
+   // std::cout << "Poin light count " << PointLightCount << std::endl;
     pLight = TheLight;
 }
 
@@ -350,7 +350,7 @@ void Shader::SetSpotLight(SpotLight* TheLight, GLuint NumberOfSpotLights)
     if (NumberOfSpotLights > MAX_SPOT_LIGHTS) NumberOfSpotLights = MAX_SPOT_LIGHTS;
     sLight = TheLight;
     SpotLightCount = NumberOfSpotLights;
-    std::cout << "spot light count " << SpotLightCount << std::endl;
+    //std::cout << "spot light count " << SpotLightCount << std::endl;
 }
 
 void Shader::EnableSpotLight(GLuint TexUnit)

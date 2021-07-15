@@ -129,7 +129,7 @@ void Model::LoadMaterials(const aiScene* Scene)
 				int Index = std::string(StringPath.data).rfind("\\");
 				//std::cout << Index << std::endl;
 				std::string FileName = std::string(StringPath.data).substr(Index + 1);
-				std::string TexturePath = std::string("Textures/")+ FileName;
+				std::string TexturePath = std::string("Textures/Models/")+ FileName;
 				std::cout << "Tex path is" << TexturePath<< std::endl;
 				TextureList[i] = new Texture((char*)TexturePath.c_str());
 				if (!TextureList[i]->LoadTexture())
@@ -143,7 +143,7 @@ void Model::LoadMaterials(const aiScene* Scene)
 		}
 		if (!TextureList[i])
 		{
-			TextureList[i] = new Texture((char*)"Textures/plain.png");
+			TextureList[i] = new Texture((char*)"Textures/Defaults/plain.png");
 		}
 	}
 }

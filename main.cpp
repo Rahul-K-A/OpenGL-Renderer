@@ -43,13 +43,13 @@ MyWindow Window(1366,768);
 Camera Cam(glm::vec3(0.0f, 1.0f, 5.f), -90.0f, 0.0f, 4.0f, 40.0f);
 
 //Light
-DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.4f), glm::vec4(1.0f, -20.f, -5.0f, 0.3f),2048,2048);
+DirectionalLight DLight(glm::vec4(0.85f,0.85f,1.f, 0.1f), glm::vec4(0.0f, -5.f, -5.0f, .05f),2048,2048);
 float Intensity;
 
 //Material
 //Currently set to unrealistic values to exagerrate specular lighting
 Material ShinyMaterial(10.f, 32);
-Material DullMaterial(10.f, 4);
+Material DullMaterial(1.f, 4);
 
 //Vectors containing Mesh pointer and shader pointer
 std::vector<Mesh*> MeshPointers;
@@ -79,7 +79,7 @@ PointLight PLightArr[MAX_POINT_LIGHTS] = {
 					0.01f,
 					100.f),
 
- PointLight(	    glm::vec4(0.f, 1.f, 0.f, 1.0f),
+ PointLight(	    glm::vec4(0.f, 1.f, 0.f,1.0f),
 					1.f, 
 					2048,
 					2048,
@@ -96,16 +96,15 @@ PointLight PLightArr[MAX_POINT_LIGHTS] = {
 					glm::vec3(0.3f, 0.2f, 0.1f),
 					0.01f,
 					100.f),
- //PointLight(glm::vec4(0.f, 0.f, 1.f, .5f), 1.f, 1024,1024, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f),0.01f,100.f)
 };
 
 
 SpotLight SLightArr[MAX_SPOT_LIGHTS] = {
- SpotLight(glm::vec4(1.f, 1.f, 1.f, 2.f),
-					2.f,
+ SpotLight(glm::vec4(1.f, 1.f, 1.f, 5.f),
+					5.f,
 					2048,
 					2048,
-					glm::vec3(0.f, 0.0f, 0.f),
+					glm::vec3(0.f, 0.f, 0.f),
 					glm::vec3(1.f, 0.0f, 0.0f),
 					0.01f,
 					100.f,
@@ -207,9 +206,9 @@ int main()
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), (GLfloat)AspectRatio, 0.1f, 100.0f);
 
 	//Set texture paths
-	BrickTexture.setPath((char*)("Textures/brick.png"));
+	BrickTexture.setPath((char*)("Textures/Defaults/brick.png"));
 	BrickTexture.LoadTextureWithAlpha();
-	DirtTexture.setPath((char*)("Textures/dirt.png"));
+	DirtTexture.setPath((char*)("Textures/Defaults/dirt.png"));
 	DirtTexture.LoadTextureWithAlpha();
 	
 	ShaderPointers[0]->SetDirectionalLight(&DLight);
@@ -356,14 +355,13 @@ void RenderScene()
 	glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
 	BrickTexture.UseTexture();
 	ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
-	//MeshPointers[0]->RenderMesh();
-	//Floor.RenderModel();
+
 
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
 	glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
 	DirtTexture.UseTexture();
-	ShinyMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
+	DullMaterial.UseMaterial(UniformSpecularIntensity, UniformSpecularShininess);
 	MeshPointers[1]->RenderMesh();
 
 	model=glm::mat4(1.0f);
