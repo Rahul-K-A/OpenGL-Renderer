@@ -52,7 +52,15 @@ void Model::ClearModel()
 }
 
 Model::~Model()
-{}
+{
+	for (Mesh* i :MeshList)
+		delete i;
+	for (Texture* i : TextureList)
+		delete i;
+	MeshList.clear();
+	TextureList.clear();
+	MeshToTex.clear();
+}
 
 void Model::LoadNode(aiNode* NodeToLoad, const aiScene* SceneToLoad)
 {

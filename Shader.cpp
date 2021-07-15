@@ -329,7 +329,6 @@ void Shader::EnablePointLight(GLuint TexUnit)
     glUniform1i(UniformPointLightCount, PointLightCount);
     for (size_t i = 0; i < PointLightCount; i++)
     {
-        //std::cout << uniformPLight[i].UniformAmbientLightColour <<" "<< uniformPLight[i].UniformAmbientLightIntensity<<std::endl;
         pLight[i].UseLight(PointLightUniformContainer[i].UniformAmbientLightColour,
             PointLightUniformContainer[i].UniformAmbientLightIntensity,
             PointLightUniformContainer[i].UniformDiffuseIntensity, 

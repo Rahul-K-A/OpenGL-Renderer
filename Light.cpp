@@ -38,7 +38,7 @@ void Light::UseLight(GLuint AmbientColorLocation, GLuint AmbientIntensityLocatio
 
 void Light::CreateShadowMap()
 {
-	//sMap = new ShadowMap();
+	
 	sMap->Init(ShadowMapWidth, ShadowMapHeight);
 }
 

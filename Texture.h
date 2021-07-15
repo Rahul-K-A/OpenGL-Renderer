@@ -1,6 +1,6 @@
 #pragma once
 #include "GL/glew.h"
-#include "stb_image.h"
+#include "CommonValues.h"
 #include <iostream>
 
 //https://learnopengl.com/Getting-started/Textures

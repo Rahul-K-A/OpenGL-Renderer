@@ -16,8 +16,13 @@
 #include "SpotLight.h"
 #include "Material.h"
 #include "Model.h"
+#include "SkyBox.h"
 #include <assimp/Importer.hpp>
 
+//-------------------------TODO----------------------------------------------------------
+	//1.Add documentation
+	//2.Fix point light and spot light shadows
+//---------------------------------------------------------------------------------------
 
 //-------------------------FUNCTIONS------------------------------------------------------
 void CreateShaders();
@@ -32,13 +37,13 @@ void RenderScene();
 
 //-------------------------GLOBAL VARIABLES------------------------------------------------------
 //Window object
-MyWindow Window(1024,576);
+MyWindow Window(1366,768);
 
 //Camera
 Camera Cam(glm::vec3(0.0f, 1.0f, 5.f), -90.0f, 0.0f, 4.0f, 40.0f);
 
 //Light
-DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f), glm::vec4(0.0f, -15.f, -10.0f, 0.f),2048,2048);
+DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.f), glm::vec4(1.0f, -20.f, -5.0f, .0f),2048,2048);
 float Intensity;
 
 //Material
@@ -52,20 +57,23 @@ std::vector<Shader*> ShaderPointers;
 Shader DirectionalShadowShader;
 Shader OmniShadowShader;
 
+
+//SkyBox
+SkyBox Sb;
+
 //Model F1 Car
 Model Car=Model();
-//Model Floor = Model();
-//Model path
+
 
 
 
 
 //PointLights
 PointLight PLightArr[MAX_POINT_LIGHTS] = {
- PointLight(		glm::vec4(1.f, 0.f, 0.f, 1.5f),
-					1.5f ,
-					1024,
-					1024,
+ PointLight(		glm::vec4(1.f, 0.f, 0.f, 1.f),
+					1.f ,
+					2048,
+					2048,
 					glm::vec3(6.f, 1.0f, 0.0f) ,
 					glm::vec3(0.3f, 0.2f, 0.1f),
 					0.01f,
@@ -73,17 +81,17 @@ PointLight PLightArr[MAX_POINT_LIGHTS] = {
 
  PointLight(	    glm::vec4(0.f, 1.f, 0.f, 1.0f),
 					1.f, 
-					1024,
-					1024,
+					2048,
+					2048,
 					glm::vec3(-4.f, 1.0f, -5.f),
 					glm::vec3(0.3f, 0.2f, 0.1f),
 					0.01f,
 				    100.f),
 
  PointLight(glm::vec4(0.f, 0.f, 1.f, 1.0f),
-					1.f,
-					1024,
-					1024,
+					0.f,
+					2048,
+					2048,
 					glm::vec3(-4.f, 1.0f, 5.f),
 					glm::vec3(0.3f, 0.2f, 0.1f),
 					0.01f,
@@ -93,21 +101,10 @@ PointLight PLightArr[MAX_POINT_LIGHTS] = {
 
 
 SpotLight SLightArr[MAX_SPOT_LIGHTS] = {
- SpotLight(			glm::vec4(1.f, 1.f, 1.f, 0.f),
-					0.f ,
-					1024,
-					1024,
-					glm::vec3(2.f, 0.75f, 0.0f) ,
-					glm::vec3(1.f, 0.f, 0.f),
-					0.01f,
-					100.f,
-					glm::vec3(0,0,1),
-					20.f),
-
- SpotLight(			glm::vec4(1.f, 1.f, 1.f, 10.f),
-					20.f,
-					1024,
-					1024,
+ SpotLight(glm::vec4(1.f, 1.f, 1.f, 0.f),
+					0.f,
+					2048,
+					2048,
 					glm::vec3(0.f, 0.0f, 0.f),
 					glm::vec3(1.f, 0.0f, 0.0f),
 					0.01f,
@@ -115,10 +112,22 @@ SpotLight SLightArr[MAX_SPOT_LIGHTS] = {
 					glm::vec3(0,-1,0),
 					20.f),
 
- SpotLight(			glm::vec4(0.f, 0.f, 1.f, .5f),
+ SpotLight(			glm::vec4(1.f, 1.f, 1.f, 0.f),
+					0.f ,
+					2048,
+					2048,
+					glm::vec3(2.f, 0.75f, 0.0f) ,
+					glm::vec3(1.f, 0.f, 0.f),
+					0.01f,
+					100.f,
+					glm::vec3(0,0,1),
+					20.f),
+
+
+ SpotLight(			glm::vec4(0.f, 0.f, 1.f, 0.f),
 					1.f,
-					1024,
-					1024,
+					2048,
+					2048,
 					glm::vec3(0.f, 0.0f, 3.f),
 					glm::vec3(1.f, 0.0f, 0.0f),
 					0.01f,
@@ -127,12 +136,6 @@ SpotLight SLightArr[MAX_SPOT_LIGHTS] = {
 					20.f),
 };
 
-//SpotLights
-//SpotLight SLightArr[2] = {
-// SpotLight( glm::vec4(1.f, 1.f, 1.f, .0f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 20.f),
-// SpotLight(glm::vec4(1.f, 1.f, 1.f, 10.f),  2.f , glm::vec3(0.f,.0f, .0f) , glm::vec3(1.f, 0.f, 0.f) , glm::vec3(0,-1,0), 20.f),
-// //SpotLight(glm::vec4(0.f, 0.f, 1.f, .2f), 1.f, glm::vec3(0.f, .0f, 1.f), glm::vec3(0.3f, 0.2f, 0.1f))
-//};
 
 
 
@@ -201,7 +204,7 @@ int main()
 	float AspectRatio = (Window.getBufferWidth() / Window.getBufferHeight()) * 1.0f;
 
 	//Angle for fov is actually defined along y axis and should be given in radians
-	glm::mat4 projection = glm::perspective(glm::radians(60.0f), (GLfloat)AspectRatio, 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(90.0f), (GLfloat)AspectRatio, 0.1f, 100.0f);
 
 	//Set texture paths
 	BrickTexture.setPath((char*)("Textures/brick.png"));
@@ -211,16 +214,30 @@ int main()
 	
 	ShaderPointers[0]->SetDirectionalLight(&DLight);
 	ShaderPointers[0]->SetPointLight(PLightArr, MAX_POINT_LIGHTS);
-	ShaderPointers[0]->SetSpotLight(SLightArr,2);
+	ShaderPointers[0]->SetSpotLight(SLightArr,MAX_SPOT_LIGHTS);
 
 	float Offset = 0.00f;
 	float Increment = 0.001f;
 	//glm::mat4 modelmatrix;
 	DLight.CreateShadowMap();
 	for (size_t i = 0; i < MAX_POINT_LIGHTS; i++)
+	{
 		PLightArr[i].CreateShadowMap();
+	}
 	for (size_t i = 0; i < MAX_SPOT_LIGHTS; i++)
+	{
 		SLightArr[i].CreateShadowMap();
+	}
+
+	std::vector<std::string> skyboxFaces;
+	skyboxFaces.push_back("Textures/SkyBox/Plains/plains-of-abraham_rt.tga");
+	skyboxFaces.push_back("Textures/SkyBox/Plains/plains-of-abraham_lf.tga");
+	skyboxFaces.push_back("Textures/SkyBox/Plains/plains-of-abraham_up.tga");
+	skyboxFaces.push_back("Textures/SkyBox/Plains/plains-of-abraham_dn.tga");
+	skyboxFaces.push_back("Textures/SkyBox/Plains/plains-of-abraham_bk.tga");
+	skyboxFaces.push_back("Textures/SkyBox/Plains/plains-of-abraham_ft.tga");
+	Sb = SkyBox(skyboxFaces);
+
 	while (Window.IsOpen())
 	{
 		double now = glfwGetTime();
@@ -236,10 +253,7 @@ int main()
 		{
 			OmniDirectionalShadowMapPass(PLightArr + i);
 		}
-		for (size_t i = 0; i <2; i++)
-		{
-			OmniDirectionalShadowMapPass(SLightArr + i);
-		}
+			//OmniDirectionalShadowMapPass(&SLightArr[1]);*/
 		DirectionalShadowMapPass(&DLight);
 		RenderPass(Cam.CalculateCameraMatrix(), projection);
 
@@ -364,12 +378,13 @@ void RenderScene()
 
 void DirectionalShadowMapPass(DirectionalLight* light)
 {
+	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
 	DirectionalShadowShader.EnableShader();
 
 	//DirectionalShadowShader.EnableDirectionalLight();
 	//DirectionalShadowShader.EnablePointLight();
 	
-	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
+	
 
 
 	light->GetShadowMap()->Write();
@@ -385,9 +400,10 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 
 void OmniDirectionalShadowMapPass(PointLight* light)
 {
+	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
 	OmniShadowShader.EnableShader();
 
-	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
+	
 
 
 	light->GetShadowMap()->Write();
@@ -402,14 +418,19 @@ void OmniDirectionalShadowMapPass(PointLight* light)
 	OmniShadowShader.SetLightMatrices(light->CalculateLightMatrices());
 
 	OmniShadowShader.ValidateShaders();
-	glCullFace(GL_FRONT);
+	//glCullFace(GL_FRONT);
 	RenderScene();
-	glCullFace(GL_BACK);
+	//glCullFace(GL_BACK);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
 void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 {
+	glViewport(0, 0, Window.getBufferWidth(), Window.getBufferHeight());
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Sb.DrawSkyBox(viewMatrix, projectionMatrix);
+
 	ShaderPointers[0]->EnableShader();
 
 	UniformModel = ShaderPointers[0]->GetUniformModel();
@@ -420,11 +441,9 @@ void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 	UniformSpecularIntensity = ShaderPointers[0]->GetUniformSpecularIntensity();
 	UniformSpecularShininess = ShaderPointers[0]->GetUniformSpecularShininess();
 
-	glViewport(0, 0,Window.getBufferWidth(), Window.getBufferHeight());
+	
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	
 	glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 	glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 	glUniform3f(UniformCameraPosition, Cam.GetCameraPosition().x, Cam.GetCameraPosition().y, Cam.GetCameraPosition().z);
@@ -438,8 +457,8 @@ void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 	ShaderPointers[0]->SetDirectionalShadowMap(GLuint(2));
 	glm::vec3 lowerLight = Cam.GetCameraPosition();
 	lowerLight.y = lowerLight.y - 0.2;
-	SLightArr[1].SetLightStatus(Cam.GetFlashLightStatus());
-	SLightArr[1].SetLocationAndDirection(lowerLight, Cam.GetCameraDirection());
+	SLightArr[0].SetLightStatus(Cam.GetFlashLightStatus());
+	SLightArr[0].SetLocationAndDirection(lowerLight, Cam.GetCameraDirection());
 	ShaderPointers[0]->ValidateShaders();
 	RenderScene();
 }

@@ -8,8 +8,8 @@ public:
 	virtual bool Init(GLuint Width, GLuint Height);
 	virtual void Write();
 	virtual void Read(GLenum TextureUnit);
-	GLuint GetShadowWidth();
-	GLuint GetShadowHeight();
+	virtual GLuint GetShadowWidth();
+	virtual GLuint GetShadowHeight();
 
 	~ShadowMap();
 protected:
