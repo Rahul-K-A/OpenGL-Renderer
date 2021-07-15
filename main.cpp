@@ -43,12 +43,12 @@ MyWindow Window(1366,768);
 Camera Cam(glm::vec3(0.0f, 1.0f, 5.f), -90.0f, 0.0f, 4.0f, 40.0f);
 
 //Light
-DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.f), glm::vec4(1.0f, -20.f, -5.0f, .0f),2048,2048);
+DirectionalLight DLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.4f), glm::vec4(1.0f, -20.f, -5.0f, 0.3f),2048,2048);
 float Intensity;
 
 //Material
 //Currently set to unrealistic values to exagerrate specular lighting
-Material ShinyMaterial(10.0f, 32);
+Material ShinyMaterial(10.f, 32);
 Material DullMaterial(10.f, 4);
 
 //Vectors containing Mesh pointer and shader pointer
@@ -89,7 +89,7 @@ PointLight PLightArr[MAX_POINT_LIGHTS] = {
 				    100.f),
 
  PointLight(glm::vec4(0.f, 0.f, 1.f, 1.0f),
-					0.f,
+					1.f,
 					2048,
 					2048,
 					glm::vec3(-4.f, 1.0f, 5.f),
@@ -101,8 +101,8 @@ PointLight PLightArr[MAX_POINT_LIGHTS] = {
 
 
 SpotLight SLightArr[MAX_SPOT_LIGHTS] = {
- SpotLight(glm::vec4(1.f, 1.f, 1.f, 0.f),
-					0.f,
+ SpotLight(glm::vec4(1.f, 1.f, 1.f, 2.f),
+					2.f,
 					2048,
 					2048,
 					glm::vec3(0.f, 0.0f, 0.f),
@@ -253,7 +253,7 @@ int main()
 		{
 			OmniDirectionalShadowMapPass(PLightArr + i);
 		}
-			//OmniDirectionalShadowMapPass(&SLightArr[1]);*/
+		OmniDirectionalShadowMapPass(&SLightArr[0]);
 		DirectionalShadowMapPass(&DLight);
 		RenderPass(Cam.CalculateCameraMatrix(), projection);
 
@@ -381,8 +381,6 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
 	DirectionalShadowShader.EnableShader();
 
-	//DirectionalShadowShader.EnableDirectionalLight();
-	//DirectionalShadowShader.EnablePointLight();
 	
 	
 
@@ -394,7 +392,7 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 	DirectionalShadowShader.SetDirectionalLightTransform(DLight.CalculateLightTransform());
 	DirectionalShadowShader.ValidateShaders();
 	RenderScene();
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 }
 
@@ -402,9 +400,6 @@ void OmniDirectionalShadowMapPass(PointLight* light)
 {
 	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
 	OmniShadowShader.EnableShader();
-
-	
-
 
 	light->GetShadowMap()->Write();
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -418,21 +413,21 @@ void OmniDirectionalShadowMapPass(PointLight* light)
 	OmniShadowShader.SetLightMatrices(light->CalculateLightMatrices());
 
 	OmniShadowShader.ValidateShaders();
-	//glCullFace(GL_FRONT);
 	RenderScene();
-	//glCullFace(GL_BACK);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 {
+
 	glViewport(0, 0, Window.getBufferWidth(), Window.getBufferHeight());
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	Sb.DrawSkyBox(viewMatrix, projectionMatrix);
 
 	ShaderPointers[0]->EnableShader();
-
 	UniformModel = ShaderPointers[0]->GetUniformModel();
 	UniformProjection = ShaderPointers[0]->GetUniformProjection();
 	UniformCameraViewPerspective = ShaderPointers[0]->GetUniformView();
@@ -443,22 +438,25 @@ void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 
 	
 
-	
+
 	glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 	glUniformMatrix4fv(UniformCameraViewPerspective, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 	glUniform3f(UniformCameraPosition, Cam.GetCameraPosition().x, Cam.GetCameraPosition().y, Cam.GetCameraPosition().z);
+
 	ShaderPointers[0]->EnableDirectionalLight();
 	ShaderPointers[0]->EnablePointLight(3);
 	ShaderPointers[0]->EnableSpotLight(3+MAX_POINT_LIGHTS);
 	ShaderPointers[0]->SetDirectionalLightTransform(DLight.CalculateLightTransform());
 
 	DLight.GetShadowMap()->Read(GL_TEXTURE2);
-	ShaderPointers[0]->SetTexture(GLuint(1));
-	ShaderPointers[0]->SetDirectionalShadowMap(GLuint(2));
+	ShaderPointers[0]->SetTexture(1);
+	ShaderPointers[0]->SetDirectionalShadowMap(2);
+
 	glm::vec3 lowerLight = Cam.GetCameraPosition();
 	lowerLight.y = lowerLight.y - 0.2;
 	SLightArr[0].SetLightStatus(Cam.GetFlashLightStatus());
 	SLightArr[0].SetLocationAndDirection(lowerLight, Cam.GetCameraDirection());
+
 	ShaderPointers[0]->ValidateShaders();
 	RenderScene();
 }

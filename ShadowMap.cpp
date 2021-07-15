@@ -29,8 +29,8 @@ bool ShadowMap::Init(GLuint Width, GLuint Height)
 	
 	
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Fbo);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, sMapTexture,0);
+	glBindFramebuffer(GL_FRAMEBUFFER, Fbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, sMapTexture,0);
 
 	//We dont actually want to draw and read this buffer . We just want the shadows
 	glDrawBuffer(GL_NONE);
@@ -45,7 +45,7 @@ bool ShadowMap::Init(GLuint Width, GLuint Height)
 		return false;
 	}
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return true;
 }
@@ -53,7 +53,7 @@ bool ShadowMap::Init(GLuint Width, GLuint Height)
 void ShadowMap::Write()
 {
 	//Writes to Fbo instead of default frame buffers that we use in main.cpp
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, Fbo);
 
 }
 

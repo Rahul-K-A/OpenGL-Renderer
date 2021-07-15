@@ -5,6 +5,8 @@
   in vec3 Normal;
   in vec3 FragmentPosition;
   in vec4  DirectionalLightSpacePosition;
+
+
   //Output data
   out vec4 colour;
 
@@ -55,6 +57,7 @@ struct OmniShadowMap{
     samplerCube ShadowTexture;
     float FarPlane;
 };
+
   //Directional light uniform variable
   uniform DirectionalLight dLight;
 
@@ -89,9 +92,12 @@ struct OmniShadowMap{
   float CalculatePointLightShadowFactor(PointLight pLight,int ShadowIndex)
   {
     vec3 FragmentToLight=FragmentPosition-pLight.LightPosition;
+    float CurrentDepth=length(FragmentToLight);
+    FragmentToLight=normalize(FragmentToLight);
+
     float ClosestDepth=texture(OSMap[ShadowIndex].ShadowTexture,FragmentToLight).r;
     ClosestDepth*=OSMap[ShadowIndex].FarPlane;
-    float CurrentDepth=length(FragmentToLight);
+    
     float bias =0.15;
     float Shadow=CurrentDepth-bias>ClosestDepth?1.0:0.0;
     return Shadow;
@@ -110,8 +116,10 @@ struct OmniShadowMap{
     //Tells us how far away camera is to the shadow
     float CurrentDepth=ProjectionCoords.z;
     float shadow=0.f;
+
     vec3 normal = normalize(Normal);
 	vec3 lightDir = normalize(dLight.Direction);
+
 	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.0005);
 	vec2 texelSize = 1.0 / textureSize(DirectionalShadowMap, 0);
 	for(int x = -1; x <= 1; ++x)
@@ -143,7 +151,7 @@ struct OmniShadowMap{
     float DiffuseFactor= max( dot( normalize(Normal), normalize(Direction))  , 0.0f);
 
     //Diffuse Lighting final calculation 
-    vec4 DiffuseLight= vec4(Light.LightColour, 1.0f) * Light.DiffuseIntensity * DiffuseFactor;
+    vec4 DiffuseLight= vec4(Light.LightColour * Light.DiffuseIntensity * DiffuseFactor, 1.0f);
 
 
     //Default specular lighting
@@ -166,11 +174,8 @@ struct OmniShadowMap{
       }
       //Returns overall lighting
       vec4 temp=DiffuseLight+SpecularLight;
-      temp.x=temp.x*(1.f-ShadowFactor);
-      temp.y=temp.y*(1.f-ShadowFactor);
-      temp.z=temp.z*(1.f-ShadowFactor);
-      temp.w=temp.w*(1.f-ShadowFactor);
-    
+      temp=temp*(1.f-ShadowFactor);
+
 
      return (AmbientLight +temp);
   }
@@ -185,16 +190,15 @@ struct OmniShadowMap{
   //Calculates lighting for a singular point Light
   vec4 CalculatePointLight(PointLight pLight,int ShadowIndex)
   {
-       //vec4 pLightColor=vec4(0,0,0,0);
      //This gives the direction from the face to the light source, 
         vec3 LightToFragmentDirection=FragmentPosition-pLight.LightPosition;
        //Distance between the face and light source
         float Distance=length(LightToFragmentDirection);
         //Normalize the direction vector
         LightToFragmentDirection=normalize(LightToFragmentDirection);
-        //While taking the distance from the face to the light as opposed to taking it from the light to the face seems unintuitive, the negative in our reflection function
-        //will work properly now and give reflection
+  
         float SFactor=CalculatePointLightShadowFactor(pLight,ShadowIndex);
+
         vec4 pLightColour=CalculateLightByDirection(pLight.LightData,LightToFragmentDirection,SFactor);
         //Calculates attenuation
         float Attenuation= pLight.A*Distance*Distance + pLight.B*Distance + pLight.C;
@@ -236,9 +240,7 @@ struct OmniShadowMap{
         //Gets smooth edges around spot light
 
         SpotLightColour =  SpotLightColour* (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
-        //SpotLightColour.y =  SpotLightColour.y * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
-        //SpotLightColour.z =  SpotLightColour.z * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
-        //SpotLightColour.w =  SpotLightColour.w * (1.0f - ( (1.0f - SpotLightFactor) / (1.0f - sLight.Cutoff) ) );
+
 
     }
     return SpotLightColour;
@@ -251,7 +253,7 @@ struct OmniShadowMap{
     vec4 TotalColour=vec4(0,0,0,0);
     for(int i=0;i<SpotLightCount;i++)
     {
-        TotalColour=TotalColour+CalculateSpotLight(sLights[i],i+PointLightCount);
+        TotalColour=TotalColour+CalculateSpotLight(sLights[i], i+PointLightCount);
     }
     return TotalColour;
     

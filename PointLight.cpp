@@ -55,7 +55,7 @@ std::vector<glm::mat4> PointLight::CalculateLightMatrices()
 {
 	std::vector<glm::mat4> lightMatrices;
 	glm::mat4 temp;
-	temp= LightProjection* glm::lookAt( LightPosition ,LightPosition+glm::vec3(1.0,0.0,0.0) ,glm::vec3(0.f,-1.f,0.f) );
+	temp= LightProjection* glm::lookAt( LightPosition,  LightPosition + glm::vec3(1.0, 0.0, 0.0) ,glm::vec3(0.f, -1.f, 0.f) );
 	lightMatrices.push_back(temp);
 
 	temp = LightProjection * glm::lookAt(LightPosition, LightPosition + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.f, -1.f, 0.f) );
@@ -67,10 +67,10 @@ std::vector<glm::mat4> PointLight::CalculateLightMatrices()
 	temp = LightProjection * glm::lookAt(LightPosition, LightPosition + glm::vec3(0.0,- 1.0, 0.0), glm::vec3(0.f, 0.f, -1.f));
 	lightMatrices.push_back(temp);
 
-	temp = LightProjection * glm::lookAt(LightPosition, LightPosition + glm::vec3(0.0, 0.0, 1.f), glm::vec3(0.1f, -1.f, 0.f));
+	temp = LightProjection * glm::lookAt(LightPosition, LightPosition + glm::vec3(0.0, 0.0, 1.f), glm::vec3(0.0f, -1.f, 0.f));
 	lightMatrices.push_back(temp);
 
-	temp = LightProjection * glm::lookAt(LightPosition, LightPosition + glm::vec3(0.0, 0.0, -1.f), glm::vec3(0.1f, -1.f, 0.f));
+	temp = LightProjection * glm::lookAt(LightPosition, LightPosition + glm::vec3(0.0, 0.0, -1.f), glm::vec3(0.f, -1.f, 0.f));
 	lightMatrices.push_back(temp);
 
 	return lightMatrices;
